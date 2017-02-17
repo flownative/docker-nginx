@@ -1,0 +1,22 @@
+image: docker:git
+
+services:
+  - docker:dind
+
+stages:
+  - build
+
+before_script:
+  - docker login -u _json_key -p "$CI_CONTAINER_REGISTRY_TOKEN" https://eu.gcr.io
+
+variables:
+  DOCKER_HOST: 'tcp://localhost:2375'
+
+build:
+  stage: build
+  script:
+    - docker pull eu.gcr.io/flownative-beach/beach-nginx:latest || true
+    - docker build -t eu.gcr.io/flownative-beach/beach-nginx:${CI_BUILD_ID} .
+    - docker push eu.gcr.io/flownative-beach/beach-nginx:${CI_BUILD_ID}
+    - docker tag eu.gcr.io/flownative-beach/beach-nginx:${CI_BUILD_ID} eu.gcr.io/flownative-beach/beach-nginx:latest
+    - docker push eu.gcr.io/flownative-beach/beach-nginx:latest
