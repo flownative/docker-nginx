@@ -21,7 +21,7 @@ server {
 
     root ${BEACH_APPLICATION_PATH}/Web;
 
-    client_max_body_size 50M;
+    client_max_body_size 100M;
     index index.php;
 
     location ~ /\\. {
@@ -34,6 +34,8 @@ server {
 
     location ~ \\.php\$ {
            include fastcgi_params;
+
+           client_max_body_size 100M;
 
            fastcgi_pass ${BEACH_PHP_FPM_HOST}:${BEACH_PHP_FPM_PORT};
            fastcgi_index index.php;
