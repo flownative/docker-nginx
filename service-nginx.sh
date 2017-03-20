@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Define defaults:
 export BEACH_CLUSTER_TYPE=${BEACH_CLUSTER_TYPE:-compose}
@@ -12,8 +12,13 @@ export BEACH_FLOW_CONTEXT=${BEACH_FLOW_BASE_CONTEXT}/Beach/Cluster
 export BEACH_PHP_FPM_HOST=${BEACH_PHP_FPM_HOST:-localhost}
 export BEACH_PHP_FPM_PORT=${BEACH_PHP_FPM_PORT:-9000}
 
+export BEACH_NGINX_MODE=${BEACH_NGINX_MODE:-Flow}
 
-sudo -u www-data cat > /etc/nginx/sites-enabled/site.conf <<- EOM
+echo "Nginx mode is ${BEACH_NGINX_MODE} ..."
+
+if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
+    echo "Enabling Flow site configuration ..."
+    sudo -u www-data cat > /etc/nginx/sites-enabled/site.conf <<- EOM
 
 server {
 
@@ -59,5 +64,22 @@ server {
     }
 }
 EOM
+else
+    echo "Enabling default site configuration ..."
+    sudo -u www-data cat > /etc/nginx/sites-enabled/default.conf <<- EOM
+server {
+
+    listen *:80 default_server;
+
+    root /var/www/html;
+
+    location ~ /\\. {
+        access_log off;
+        log_not_found off;
+    }
+
+}
+EOM
+fi
 
 exec /usr/sbin/nginx -g "daemon off;"
