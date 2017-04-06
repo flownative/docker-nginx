@@ -15,7 +15,6 @@ variables:
 build-latest:
   stage: build
   script:
-    - docker pull eu.gcr.io/flownative-beach/beach-nginx:latest || true
     - docker build -t eu.gcr.io/flownative-beach/beach-nginx:${CI_BUILD_ID} .
     - docker push eu.gcr.io/flownative-beach/beach-nginx:${CI_BUILD_ID}
     - docker tag eu.gcr.io/flownative-beach/beach-nginx:${CI_BUILD_ID} eu.gcr.io/flownative-beach/beach-nginx:latest
