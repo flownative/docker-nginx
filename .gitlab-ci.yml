@@ -11,23 +11,12 @@ before_script:
 
 variables:
   DOCKER_HOST: 'tcp://localhost:2375'
-
-build-latest:
-  stage: build
-  script:
-    - docker build -t eu.gcr.io/flownative-beach/beach-nginx:${CI_BUILD_ID} .
-    - docker push eu.gcr.io/flownative-beach/beach-nginx:${CI_BUILD_ID}
-    - docker tag eu.gcr.io/flownative-beach/beach-nginx:${CI_BUILD_ID} eu.gcr.io/flownative-beach/beach-nginx:latest
-    - docker push eu.gcr.io/flownative-beach/beach-nginx:latest
-  only:
-    - master
+  DOCKER_DRIVER: 'overlay'
 
 build-tagged:
   stage: build
-  script:
-    - docker build -t eu.gcr.io/flownative-beach/beach-nginx:${CI_BUILD_REF_SLUG} .
-    - docker push eu.gcr.io/flownative-beach/beach-nginx:${CI_BUILD_REF_SLUG}
   only:
     - tags
-  except:
-    - master
+  script:
+    - docker build -t eu.gcr.io/flownative-beach/beach-nginx:${CI_COMMIT_TAG} .
+    - docker push eu.gcr.io/flownative-beach/beach-nginx:${CI_COMMIT_TAG}
