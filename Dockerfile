@@ -27,5 +27,6 @@ COPY service-nginx.sh /etc/service/nginx/run
 RUN chmod 755 /etc/service/nginx/run \
     && chown root:root /etc/service/nginx/run
 COPY nginx.conf /etc/nginx/nginx.conf
+COPY mime.types /etc/nginx/
 
 EXPOSE 80
