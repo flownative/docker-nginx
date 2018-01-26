@@ -6,7 +6,7 @@ RUN groupadd -r -g 1000 beach && useradd -s /bin/bash -r -g beach -G beach -p "*
 RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 RUN echo "deb http://nginx.org/packages/mainline/ubuntu/ trusty nginx" >> /etc/apt/sources.list
 
-ENV NGINX_VERSION 1.9.15-0ubuntu1
+ENV NGINX_VERSION 1.10.3-0ubuntu0.16.04.2
 
 # Note: we need nginx-extras for the chunkin and more headers module and apache2-utils for the htpasswd command
 RUN apt-get update \
