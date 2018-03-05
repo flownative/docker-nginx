@@ -62,7 +62,7 @@ server {
         try_files \$uri \$uri/ /index.php?\$args;
     }
 
-    location ~* \\.(jpg|jpeg|gif|css|png|js|ico|svg|woff|map)\$ {
+    location ~* \\.(jpg|jpeg|gif|css|png|js|ico|svg|woff|woff2|map)\$ {
            access_log off;
            expires max;
     }
