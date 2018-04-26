@@ -13,6 +13,8 @@ else
     export BEACH_FLOW_CONTEXT=${BEACH_FLOW_BASE_CONTEXT}/Beach/${BEACH_FLOW_SUB_CONTEXT}
 fi
 
+export BEACH_FLOW_HTTP_TRUSTED_PROXIES=${BEACH_FLOW_HTTP_TRUSTED_PROXIES:-10.0.0.0/8}
+
 export BEACH_PHP_FPM_HOST=${BEACH_PHP_FPM_HOST:-localhost}
 export BEACH_PHP_FPM_PORT=${BEACH_PHP_FPM_PORT:-9000}
 
@@ -52,6 +54,7 @@ server {
            fastcgi_param FLOW_CONTEXT ${BEACH_FLOW_CONTEXT};
            fastcgi_param FLOW_REWRITEURLS 1;
            fastcgi_param FLOW_ROOTPATH ${BEACH_APPLICATION_PATH};
+           fastcgi_param FLOW_HTTP_TRUSTED_PROXIES ${BEACH_FLOW_HTTP_TRUSTED_PROXIES};
 
            fastcgi_split_path_info ^(.+\\.php)(.*)\$;
            fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
