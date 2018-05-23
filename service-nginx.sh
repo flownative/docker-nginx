@@ -62,7 +62,17 @@ server {
            fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
            fastcgi_param PATH_INFO \$fastcgi_path_info;
     }
+EOM
 
+    if [ ! -z ${BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET} ]; then
+        sudo -u www-data cat >> /etc/nginx/sites-enabled/site.conf <<- EOM
+    location ~* ^/_Resources/Persistent/(.*)\$ {
+        return 301 https://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET}/\$1;
+    }
+EOM
+    fi
+
+    sudo -u www-data cat >> /etc/nginx/sites-enabled/site.conf <<- EOM
     location / {
         try_files \$uri \$uri/ /index.php?\$args;
     }
@@ -71,17 +81,6 @@ server {
            access_log off;
            expires max;
     }
-EOM
-
-    if [ ! -z ${BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET} ]; then
-        sudo -u www-data cat > /etc/nginx/sites-enabled/site.conf <<- EOM
-    location ~* ^/_Resources/Persistent/(.*)\$ {
-        return 301 https://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET}/\$1;
-    }
-EOM
-    fi
-
-    sudo -u www-data cat > /etc/nginx/sites-enabled/site.conf <<- EOM
 }
 EOM
 
