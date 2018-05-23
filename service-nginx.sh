@@ -15,6 +15,8 @@ fi
 
 export BEACH_FLOW_HTTP_TRUSTED_PROXIES=${BEACH_FLOW_HTTP_TRUSTED_PROXIES:-10.0.0.0/8}
 
+export BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET=${BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET:-}
+
 export BEACH_PHP_FPM_HOST=${BEACH_PHP_FPM_HOST:-localhost}
 export BEACH_PHP_FPM_PORT=${BEACH_PHP_FPM_PORT:-9000}
 
@@ -69,8 +71,20 @@ server {
            access_log off;
            expires max;
     }
+EOM
+
+    if [ ! -z ${BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET} ]; then
+        sudo -u www-data cat > /etc/nginx/sites-enabled/site.conf <<- EOM
+    location ~* ^/_Resources/Persistent/(.*)\$ {
+        return 301 https://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET}/\$1;
+    }
+EOM
+    fi
+
+    sudo -u www-data cat > /etc/nginx/sites-enabled/site.conf <<- EOM
 }
 EOM
+
 else
     echo "Enabling default site configuration ..."
     sudo -u www-data cat > /etc/nginx/sites-enabled/default.conf <<- EOM
