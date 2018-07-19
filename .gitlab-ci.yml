@@ -12,6 +12,7 @@ before_script:
 variables:
   DOCKER_HOST: 'tcp://localhost:2375'
   DOCKER_DRIVER: 'overlay'
+  DOCKER_IMAGE_NAME: 'beach-nginx'
 
 build-tagged:
   stage: build
@@ -20,20 +21,27 @@ build-tagged:
   script:
     - export MAJOR="$(echo $CI_COMMIT_TAG | cut -d'.' -f1)"
     - export MINOR="$(echo $CI_COMMIT_TAG | cut -d'.' -f2)"
-    - docker build -t eu.gcr.io/flownative-beach/beach-nginx:${CI_COMMIT_TAG} .
-    - docker push eu.gcr.io/flownative-beach/beach-nginx:${CI_COMMIT_TAG}
-    - docker tag eu.gcr.io/flownative-beach/beach-nginx:${CI_COMMIT_TAG} eu.gcr.io/flownative-beach/beach-nginx:${MAJOR}
-    - docker push eu.gcr.io/flownative-beach/beach-nginx:${MAJOR}
-    - docker tag eu.gcr.io/flownative-beach/beach-nginx:${CI_COMMIT_TAG} eu.gcr.io/flownative-beach/beach-nginx:${MAJOR}.${MINOR}
-    - docker push eu.gcr.io/flownative-beach/beach-nginx:${MAJOR}.${MINOR}
-    - docker tag eu.gcr.io/flownative-beach/beach-nginx:${CI_COMMIT_TAG} eu.gcr.io/flownative-beach/beach-nginx:latest
-    - docker push eu.gcr.io/flownative-beach/beach-nginx:latest
+
+    - docker build -t eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID} .
+    - docker push eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID}
+
+    - docker tag eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID} eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG}
+    - docker push eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG}
+    - docker tag eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID} eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:${MAJOR}
+    - docker push eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:${MAJOR}
+    - docker tag eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID} eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:${MAJOR}.${MINOR}
+    - docker push eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:${MAJOR}.${MINOR}
+    - docker tag eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID} eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:latest
+    - docker push eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:latest
+
     - docker login -u "$DOCKER_IO_REGISTRY_USER" -p "$DOCKER_IO_REGISTRY_PASSWORD" $DOCKER_IO_REGISTRY
-    - docker tag eu.gcr.io/flownative-beach/beach-nginx:${CI_COMMIT_TAG} docker.io/flownative/beach-nginx:${CI_COMMIT_TAG}
-    - docker push docker.io/flownative/beach-nginx:${CI_COMMIT_TAG}
-    - docker tag eu.gcr.io/flownative-beach/beach-nginx:${CI_COMMIT_TAG} docker.io/flownative/beach-nginx:${MAJOR}
-    - docker push docker.io/flownative/beach-nginx:${MAJOR}
-    - docker tag eu.gcr.io/flownative-beach/beach-nginx:${CI_COMMIT_TAG} docker.io/flownative/beach-nginx:${MAJOR}.${MINOR}
-    - docker push docker.io/flownative/beach-nginx:${MAJOR}.${MINOR}
-    - docker tag eu.gcr.io/flownative-beach/beach-nginx:${CI_COMMIT_TAG} docker.io/flownative/beach-nginx:latest
-    - docker push docker.io/flownative/beach-nginx:latest
+    - docker tag eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID} docker.io/flownative/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID}
+    - docker push docker.io/flownative/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID}
+    - docker tag eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID} docker.io/flownative/${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG}
+    - docker push docker.io/flownative/${DOCKER_IMAGE_NAME}:${CI_COMMIT_TAG}
+    - docker tag eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID} docker.io/flownative/${DOCKER_IMAGE_NAME}:${MAJOR}
+    - docker push docker.io/flownative/${DOCKER_IMAGE_NAME}:${MAJOR}
+    - docker tag eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID} docker.io/flownative/${DOCKER_IMAGE_NAME}:${MAJOR}.${MINOR}
+    - docker push docker.io/flownative/${DOCKER_IMAGE_NAME}:${MAJOR}.${MINOR}
+    - docker tag eu.gcr.io/flownative-beach/${DOCKER_IMAGE_NAME}:build-${CI_JOB_ID} docker.io/flownative/${DOCKER_IMAGE_NAME}:latest
+    - docker push docker.io/flownative/${DOCKER_IMAGE_NAME}:latest
