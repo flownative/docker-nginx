@@ -1,4 +1,4 @@
-FROM eu.gcr.io/flownative-beach/base:0.9.22-9
+FROM eu.gcr.io/flownative-beach/base:0.10.2-1
 MAINTAINER Robert Lemke <robert@flownative.com>
 
 RUN groupadd -r -g 1000 beach && useradd -s /bin/bash -r -g beach -G beach -p "*" -u 1000 beach
