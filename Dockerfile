@@ -1,4 +1,4 @@
-FROM eu.gcr.io/flownative-beach/base:0.10.2-1
+FROM registry.gitlab.com/flownative/docker/base:1
 MAINTAINER Robert Lemke <robert@flownative.com>
 
 RUN groupadd -r -g 1000 beach && useradd -s /bin/bash -r -g beach -G beach -p "*" -u 1000 beach
@@ -6,7 +6,7 @@ RUN groupadd -r -g 1000 beach && useradd -s /bin/bash -r -g beach -G beach -p "*
 RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
 RUN echo "deb http://nginx.org/packages/mainline/ubuntu/ trusty nginx" >> /etc/apt/sources.list
 
-ENV NGINX_VERSION 1.10.3-0ubuntu0.16.04.2
+ENV NGINX_VERSION 1.14.0-0ubuntu1.2
 
 # Note: we need nginx-extras for the chunkin and more headers module and apache2-utils for the htpasswd command
 RUN apt-get update \
