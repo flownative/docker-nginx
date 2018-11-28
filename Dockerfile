@@ -3,9 +3,7 @@ MAINTAINER Robert Lemke <robert@flownative.com>
 
 RUN groupadd -r -g 1000 beach && useradd -s /bin/bash -r -g beach -G beach -p "*" -u 1000 beach
 
-RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
-RUN echo "deb http://nginx.org/packages/mainline/ubuntu/ trusty nginx" >> /etc/apt/sources.list
-
+# Latest versions: https://packages.ubuntu.com/bionic/nginx
 ENV NGINX_VERSION 1.14.0-0ubuntu1.2
 
 # Note: we need nginx-extras for the chunkin and more headers module and apache2-utils for the htpasswd command
