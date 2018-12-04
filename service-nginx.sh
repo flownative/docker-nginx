@@ -44,8 +44,7 @@ server {
     index index.php;
 
     location ~ /\\.well-known/(.*)$ {
-        alias /application/Web/.well-known/$1;
-        index index.html;
+        allow all;
     }
 
     location ~ /\\. {
@@ -53,6 +52,8 @@ server {
         access_log off;
         log_not_found off;
     }
+
+    add_header Via '$hostname';
 
     try_files \$uri \$uri/ /index.php?\$args;
 
