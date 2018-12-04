@@ -43,6 +43,11 @@ server {
     client_max_body_size 500M;
     index index.php;
 
+    location ~ /\\.well-known/(.*)$ {
+        alias /application/Web/.well-known/$1;
+        index index.html;
+    }
+
     location ~ /\\. {
         deny all;
         access_log off;
