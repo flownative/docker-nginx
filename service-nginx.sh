@@ -80,6 +80,7 @@ EOM
         sudo -u www-data cat >> /etc/nginx/sites-enabled/site.conf <<- EOM
     location ~* ^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]+)/.*\$ {
         resolver 8.8.8.8;
+        proxy_set_header Authorization "";
         proxy_pass http://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1;
     }
 EOM
