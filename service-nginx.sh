@@ -21,6 +21,7 @@ else
     export BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET=${BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET}
 fi
 
+export BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI=${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI:-}
 export BEACH_PERSISTENT_RESOURCES_BASE_PATH=${BEACH_PERSISTENT_RESOURCES_BASE_PATH:-/_Resources/Persistent/}
 
 export BEACH_PHP_FPM_HOST=${BEACH_PHP_FPM_HOST:-localhost}
@@ -84,6 +85,22 @@ EOM
         proxy_pass http://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1;
     }
 EOM
+    elif [ ! -z ${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI} ]; then
+        sudo -u www-data cat >> /etc/nginx/sites-enabled/site.conf <<- EOM
+    location ~* ^/_Resources/Persistent/(.*)$ {
+        access_log off;
+        expires max;
+        try_files \$uri \$uri/ @fallback;
+    }
+
+    location @fallback {
+        set \$assetUri ${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}\$1;
+        add_header Via 'Beach Asset Fallback';
+        resolver 8.8.8.8;
+        proxy_pass \$assetUri;
+    }
+EOM
+
     fi
 
     sudo -u www-data cat >> /etc/nginx/sites-enabled/site.conf <<- EOM
