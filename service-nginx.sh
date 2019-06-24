@@ -56,7 +56,7 @@ server {
 
     add_header Via '$hostname';
 
-    try_files \$uri \$uri/ /index.php?\$args;
+    try_files \$uri /index.php?\$args;
 
     location ~ \\.php\$ {
            include fastcgi_params;
@@ -90,7 +90,7 @@ EOM
     location ~* ^/_Resources/Persistent/(.*)$ {
         access_log off;
         expires max;
-        try_files \$uri \$uri/ @fallback;
+        try_files \$uri @fallback;
     }
 
     location @fallback {
@@ -105,7 +105,7 @@ EOM
 
     sudo -u www-data cat >> /etc/nginx/sites-enabled/site.conf <<- EOM
     location / {
-        try_files \$uri \$uri/ /index.php?\$args;
+        try_files \$uri /index.php?\$args;
     }
 
     location ~* \\.(jpg|jpeg|gif|css|png|js|ico|svg|woff|woff2|map)\$ {
