@@ -1,25 +1,33 @@
-FROM registry.gitlab.com/flownative/docker/base:1
+FROM registry.gitlab.com/flownative/docker/base:daily
 MAINTAINER Robert Lemke <robert@flownative.com>
 
-RUN groupadd -r -g 1000 beach && useradd -s /bin/bash -r -g beach -G beach -p "*" -u 1000 beach
-
+# -----------------------------------------------------------------------------
+# Nginx
+#
 # Latest versions: https://packages.ubuntu.com/bionic/nginx
-ENV NGINX_VERSION 1.14.0-0ubuntu1.2
+ARG NGINX_VERSION
+ENV NGINX_VERSION ${NGINX_VERSION}
+
+# Create the beach user and group
+RUN groupadd -r -g 1000 beach && \
+    useradd -s /bin/bash -r -g beach -G beach -p "*" -u 1000 beach && \
+    rm -f /var/log/* /etc/group~ /etc/gshadow~
 
 # Note: we need nginx-extras for the chunkin and more headers module and apache2-utils for the htpasswd command
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends --no-install-suggests \
-        ca-certificates \
-        nginx-common=${NGINX_VERSION} \
+    && apt-get install \
+        nginx-light=${NGINX_VERSION} \
         nginx-extras=${NGINX_VERSION} \
-        apache2-utils \
     && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/log/apt \
+    && rm -rf /var/log/dpkg.log \
+    && rm -rf /var/www \
     && rm /etc/nginx/sites-available/default \
     && rm /etc/nginx/sites-enabled/default
 
-# forward request and error logs to docker log collector
-RUN ln -sf /dev/stdout /var/log/nginx/access.log
-RUN ln -sf /dev/stderr /var/log/nginx/error.log
+# Forward request and error logs to docker log collector
+RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log
 
 COPY service-nginx.sh /etc/service/nginx/run
 RUN chmod 755 /etc/service/nginx/run \
