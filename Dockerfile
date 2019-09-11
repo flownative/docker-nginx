@@ -16,7 +16,7 @@ RUN groupadd -r -g 1000 beach && \
 # Note: we need nginx-extras for the chunkin and more headers module and apache2-utils for the htpasswd command
 RUN apt-get update \
     && apt-get install \
-        nginx-light=${NGINX_VERSION} \
+        nginx-common=${NGINX_VERSION} \
         nginx-extras=${NGINX_VERSION} \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /var/log/apt \
