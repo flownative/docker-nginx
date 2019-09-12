@@ -1,10 +1,10 @@
-FROM registry.gitlab.com/flownative/docker/base:daily
+FROM registry.gitlab.com/flownative/docker/base:latest
 MAINTAINER Robert Lemke <robert@flownative.com>
 
 # -----------------------------------------------------------------------------
 # Nginx
-#
 # Latest versions: https://packages.ubuntu.com/bionic/nginx
+
 ARG NGINX_VERSION
 ENV NGINX_VERSION ${NGINX_VERSION}
 
