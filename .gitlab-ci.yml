@@ -11,3 +11,6 @@ include:
     file: '/gitlab-ci/docker.release-google.yaml'
   - project: 'flownative/infrastructure/build-tools'
     file: '/gitlab-ci/docker.release-docker-io.yaml'
+
+variables:
+  RELEASE_LATEST: 'false'
