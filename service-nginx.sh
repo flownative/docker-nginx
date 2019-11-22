@@ -102,7 +102,7 @@ EOM
     }
 
     # for all static resources
-    location ~ ^/Resources/Static/ {
+    location ~ ^/_Resources/Static/ {
         access_log off;
         expires max;
     }
