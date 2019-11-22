@@ -30,18 +30,18 @@ if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
     sudo -u www-data cat > /etc/nginx/sites-enabled/site.conf <<- EOM
 
 server {
-
     listen *:80 default_server;
 
     root ${BEACH_APPLICATION_PATH}/Web;
 
     client_max_body_size 500M;
-    index index.php;
 
-    location ~ /\\.well-known/(.*)$ {
+    # allow .well-known/... in root
+    location ~ ^/\\.well-known/.+ {
         allow all;
     }
 
+    # deny files starting with a dot (having "/." in the path)
     location ~ /\\. {
         deny all;
         access_log off;
@@ -50,9 +50,7 @@ server {
 
     add_header Via '$hostname';
 
-    try_files \$uri /index.php?\$args;
-
-    location ~ \\.php\$ {
+    location ~ ^/[^/]+\\.php\$ {
            include fastcgi_params;
 
            client_max_body_size 500M;
@@ -98,13 +96,15 @@ EOM
     fi
 
     sudo -u www-data cat >> /etc/nginx/sites-enabled/site.conf <<- EOM
+    # everything is tried as file first, then passed on to index.php (i.e. Flow)
     location / {
         try_files \$uri /index.php?\$args;
     }
 
-    location ~* \\.(jpg|jpeg|gif|css|png|js|ico|svg|woff|woff2|map)\$ {
-           access_log off;
-           expires max;
+    # for all static resources
+    location ~ ^/Resources/Static/ {
+        access_log off;
+        expires max;
     }
 }
 EOM
@@ -113,16 +113,15 @@ else
     echo "Enabling default site configuration ..."
     sudo -u www-data cat > /etc/nginx/sites-enabled/default.conf <<- EOM
 server {
-
     listen *:80 default_server;
 
     root /var/www/html;
 
+    # deny files starting with a dot (having "/." in the path)
     location ~ /\\. {
         access_log off;
         log_not_found off;
     }
-
 }
 EOM
 fi
