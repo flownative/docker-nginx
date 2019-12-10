@@ -13,4 +13,4 @@ include:
     file: '/gitlab-ci/docker.release-docker-io.yaml'
 
 variables:
-  RELEASE_LATEST: 'false'
+  RELEASE_LATEST: 'true'
