@@ -3,13 +3,14 @@ include:
     file: '/gitlab-ci/docker.base.yaml'
   - project: 'flownative/infrastructure/build-tools'
     file: '/gitlab-ci/docker.build.yaml'
-  - template: 'Container-Scanning.gitlab-ci.yml'
   - project: 'flownative/infrastructure/build-tools'
     file: '/gitlab-ci/docker.release.yaml'
   - project: 'flownative/infrastructure/build-tools'
     file: '/gitlab-ci/docker.release-google.yaml'
   - project: 'flownative/infrastructure/build-tools'
     file: '/gitlab-ci/docker.release-docker-io.yaml'
+
+  - template: 'Container-Scanning.gitlab-ci.yml'
 
 variables:
   RELEASE_LATEST: 'true'
