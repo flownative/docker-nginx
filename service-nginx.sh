@@ -22,6 +22,8 @@ export BEACH_PERSISTENT_RESOURCES_BASE_PATH=${BEACH_PERSISTENT_RESOURCES_BASE_PA
 export BEACH_PHP_FPM_HOST=${BEACH_PHP_FPM_HOST:-localhost}
 export BEACH_PHP_FPM_PORT=${BEACH_PHP_FPM_PORT:-9000}
 export BEACH_NGINX_MODE=${BEACH_NGINX_MODE:-Flow}
+export BEACH_NGINX_STATUS_ENABLE=${BEACH_NGINX_STATUS_ENABLE:-true}
+export BEACH_NGINX_STATUS_PORT=${BEACH_NGINX_STATUS_PORT:-8080}
 
 echo "Nginx mode is ${BEACH_NGINX_MODE} ..."
 
@@ -125,6 +127,28 @@ server {
 
 }
 EOM
+fi
+
+if [ "${BEACH_NGINX_STATUS_ENABLE}" == "true" ]; then
+    echo "Enabling status endpoint ..."
+    sudo -u www-data cat > /etc/nginx/sites-enabled/default.conf <<- EOM
+server {
+
+    listen *:${BEACH_NGINX_STATUS_PORT};
+
+    location = /status {
+        stub_status;
+        allow all;
+    }
+
+    location / {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}
+EOM
+
 fi
 
 exec /usr/sbin/nginx -g "daemon off;"
