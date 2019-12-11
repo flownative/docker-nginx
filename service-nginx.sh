@@ -130,7 +130,7 @@ EOM
 fi
 
 if [ "${BEACH_NGINX_STATUS_ENABLE}" == "true" ]; then
-    echo "Enabling status endpoint ..."
+    echo "Enabling status endpoint /status on port ${BEACH_NGINX_STATUS_PORT} ..."
     sudo -u www-data cat > /etc/nginx/sites-enabled/default.conf <<- EOM
 server {
 
