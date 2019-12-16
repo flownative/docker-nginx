@@ -25,6 +25,10 @@ export BEACH_NGINX_MODE=${BEACH_NGINX_MODE:-Flow}
 export BEACH_NGINX_STATUS_ENABLE=${BEACH_NGINX_STATUS_ENABLE:-true}
 export BEACH_NGINX_STATUS_PORT=${BEACH_NGINX_STATUS_PORT:-8080}
 
+export BEACH_NGINX_CUSTOM_METRICS_ENABLE=${BEACH_NGINX_CUSTOM_METRICS_ENABLE:-false}
+export BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH=${BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH:-/metrics}
+export BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT=${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT:-8081}
+
 echo "Nginx mode is ${BEACH_NGINX_MODE} ..."
 
 if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
@@ -131,7 +135,7 @@ fi
 
 if [ "${BEACH_NGINX_STATUS_ENABLE}" == "true" ]; then
     echo "Enabling status endpoint /status on port ${BEACH_NGINX_STATUS_PORT} ..."
-    sudo -u www-data cat > /etc/nginx/sites-enabled/default.conf <<- EOM
+    sudo -u www-data cat > /etc/nginx/sites-enabled/status.conf <<- EOM
 server {
 
     listen *:${BEACH_NGINX_STATUS_PORT};
@@ -149,6 +153,45 @@ server {
 }
 EOM
 
+  if [ "${BEACH_NGINX_CUSTOM_METRICS_ENABLE}" == "true" ]; then
+      echo "Enabling custom status endpoint /status on port ${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT} ..."
+      sudo -u www-data cat > /etc/nginx/sites-enabled/custom_metrics.conf <<- EOM
+server {
+    listen *:${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT};
+
+    root /application/Web;
+
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    location ${BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH} {
+      try_files \$uri /index.php?\$args;
+    }
+
+    location ~ \\.php\$ {
+        include fastcgi_params;
+
+        fastcgi_pass ${BEACH_PHP_FPM_HOST}:${BEACH_PHP_FPM_PORT};
+        fastcgi_index index.php;
+
+        fastcgi_param FLOW_CONTEXT ${BEACH_FLOW_CONTEXT};
+        fastcgi_param FLOW_REWRITEURLS 1;
+        fastcgi_param FLOW_ROOTPATH ${BEACH_APPLICATION_PATH};
+        fastcgi_param FLOW_HTTP_TRUSTED_PROXIES ${BEACH_FLOW_HTTP_TRUSTED_PROXIES};
+
+        fastcgi_param FLOWNATIVE_PROMETHEUS_ENABLE true;
+
+        fastcgi_split_path_info ^(.+\\.php)(.*)\$;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        fastcgi_param PATH_INFO \$fastcgi_path_info;
+    }
+}
+EOM
+
+  fi
 fi
 
 exec /usr/sbin/nginx -g "daemon off;"
