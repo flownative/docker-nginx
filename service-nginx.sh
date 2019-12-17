@@ -29,6 +29,8 @@ export BEACH_NGINX_CUSTOM_METRICS_ENABLE=${BEACH_NGINX_CUSTOM_METRICS_ENABLE:-fa
 export BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH=${BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH:-/metrics}
 export BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT=${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT:-8081}
 
+export BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET=${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET:-}
+
 echo "Nginx mode is ${BEACH_NGINX_MODE} ..."
 
 if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
@@ -66,6 +68,15 @@ server {
            fastcgi_pass ${BEACH_PHP_FPM_HOST}:${BEACH_PHP_FPM_PORT};
            fastcgi_index index.php;
 
+EOM
+    if [ -n "${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET}" ]; then
+    echo "Enabling custom error page pointing to ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET} ..."
+    sudo -u www-data cat >> /etc/nginx/sites-enabled/site.conf <<- EOM
+           fastcgi_intercept_errors on;
+           error_page 500 501 502 503 ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET};
+EOM
+    fi
+    sudo -u www-data cat >> /etc/nginx/sites-enabled/site.conf <<- EOM
            fastcgi_param FLOW_CONTEXT ${BEACH_FLOW_CONTEXT};
            fastcgi_param FLOW_REWRITEURLS 1;
            fastcgi_param FLOW_ROOTPATH ${BEACH_APPLICATION_PATH};
