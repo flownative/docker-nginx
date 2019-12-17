@@ -56,7 +56,17 @@ server {
         log_not_found off;
     }
 
-    add_header Via '$hostname';
+    location = /favicon.ico {
+        log_not_found off;
+        access_log off;
+    }
+
+    location = /robots.txt {
+        log_not_found off;
+        access_log off;
+    }
+
+    add_header Via '\$hostname';
 
     try_files \$uri /index.php?\$args;
 
