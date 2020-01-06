@@ -1,4 +1,4 @@
-FROM registry.gitlab.com/flownative/docker/base:1
+FROM flownative/base:1
 MAINTAINER Robert Lemke <robert@flownative.com>
 
 # -----------------------------------------------------------------------------
