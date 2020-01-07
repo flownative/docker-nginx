@@ -10,10 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
 
       - name: Build Docker image
         uses: flownative/action-docker-build@v1
@@ -21,10 +18,3 @@ jobs:
           tag_ref: ${{ github.ref }}
           image_name: flownative/docker-beach-nginx/beach-nginx
           registry_password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create latest tag in Git
-        uses: EndBug/latest-tag@latest
-        with:
-          description: Latest released version
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

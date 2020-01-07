@@ -10,7 +10,8 @@ jobs:
 
       - uses: actions/checkout@v2
         with:
-          ref: 'latest'
+          ref: 'master'
+          fetch-depth: 100
 
       - name: Determine latest released version
         id: latest_version
