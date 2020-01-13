@@ -17,4 +17,4 @@ jobs:
         with:
           tag_ref: ${{ github.ref }}
           image_name: flownative/docker-beach-nginx/beach-nginx
-          registry_password: ${{ secrets.GITHUB_TOKEN }}
+          registry_password: ${{ secrets.GITHUB_BOT_TOKEN }}
