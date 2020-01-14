@@ -1,4 +1,4 @@
-FROM flownative/base:1
+FROM docker.pkg.github.com/flownative/docker-base/base:1
 MAINTAINER Robert Lemke <robert@flownative.com>
 
 # -----------------------------------------------------------------------------
