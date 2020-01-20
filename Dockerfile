@@ -1,6 +1,10 @@
 FROM docker.pkg.github.com/flownative/docker-base/base:1
 MAINTAINER Robert Lemke <robert@flownative.com>
 
+LABEL com.flownative.name="Beach Nginx"
+LABEL com.flownative.description="Docker image providing Nginx for Beach instances"
+LABEL com.flownative.vendor="Flownative GmbH"
+
 # -----------------------------------------------------------------------------
 # Nginx
 # Latest versions: https://packages.ubuntu.com/bionic/nginx
