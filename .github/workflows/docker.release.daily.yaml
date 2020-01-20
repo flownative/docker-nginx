@@ -25,3 +25,19 @@ jobs:
           git_repository_url: https://github.com/${{ github.repository }}
           git_sha: ${{ github.sha }}
           registry_password: ${{ secrets.GITHUB_BOT_TOKEN }}
+
+      - name: Tag semver releases
+        uses: flownative/action-docker-publish-semver@v1
+        with:
+          tag_ref: ${{ steps.latest_version.outputs.tag }}
+          tag_latest: 'yes'
+
+          source_image_name: docker.pkg.github.com/flownative/docker-beach-nginx/beach-nginx
+          source_registry_username: github
+          source_registry_password: ${{ secrets.GITHUB_BOT_TOKEN }}
+          source_registry_endpoint: https://docker.pkg.github.com/v2/
+
+          target_image_name: docker.pkg.github.com/flownative/docker-beach-nginx/beach-nginx
+          target_registry_username: github
+          target_registry_password: ${{ secrets.GITHUB_TOKEN }}
+          target_registry_endpoint: https://docker.pkg.github.com/v2/
