@@ -13,8 +13,10 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build Docker image
-        uses: flownative/action-docker-build@v1
+        uses: flownative/action-docker-build@master
         with:
           tag_ref: ${{ github.ref }}
           image_name: flownative/docker-beach-nginx/beach-nginx
+          git_repository_url: https://github.com/${{ github.repository }}
+          git_sha: ${{ github.sha }}
           registry_password: ${{ secrets.GITHUB_BOT_TOKEN }}
