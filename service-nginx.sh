@@ -68,7 +68,7 @@ server {
 
     add_header Via '\$hostname';
 
-    location ~ ^/[^/]+\\.php\$ {
+    location ~ \\.php\$ {
            include fastcgi_params;
 
            client_max_body_size 500M;
