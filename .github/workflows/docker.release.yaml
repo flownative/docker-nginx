@@ -74,7 +74,7 @@ jobs:
           source_registry_password: ${{ secrets.GITHUB_BOT_TOKEN }}
           source_registry_endpoint: https://docker.pkg.github.com/v2/
 
-          target_image_name: flownative/base
+          target_image_name: flownative/beach-nginx
           target_registry_username: ${{ secrets.DOCKER_IO_REGISTRY_USER }}
           target_registry_password: ${{ secrets.DOCKER_IO_REGISTRY_PASSWORD }}
           target_registry_endpoint: https://index.docker.io/v1/
