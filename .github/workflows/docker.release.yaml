@@ -1,4 +1,4 @@
-name: Release latest version to gcr.io
+name: Release to Docker Registries
 on:
   repository_dispatch:
     types: [image-built]
