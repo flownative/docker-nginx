@@ -7,7 +7,6 @@ jobs:
   release-github:
     runs-on: ubuntu-latest
     steps:
-
       - name: Tag semver releases
         uses: flownative/action-docker-publish-semver@v1
         with:
@@ -28,7 +27,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: release-github
     steps:
-
       - name: Publish release to gcr.io (beach-core)
         uses: flownative/action-docker-publish-semver@v1
         with:
@@ -64,7 +62,7 @@ jobs:
   release-dockerio:
     runs-on: ubuntu-latest
     needs: release-github
-
+    steps:
       - name: Publish release to docker.io
         uses: flownative/action-docker-publish-semver@v1
         with:
