@@ -8,6 +8,7 @@
 # Load helper lib
 
 . "${FLOWNATIVE_LIB_PATH}/log.sh"
+. "${FLOWNATIVE_LIB_PATH}/files.sh"
 . "${FLOWNATIVE_LIB_PATH}/validation.sh"
 
 # ---------------------------------------------------------------------------------------
@@ -48,5 +49,5 @@ nginx_initialize() {
 
     rm -f "${NGINX_TMP_PATH}/nginx.pid"
     envsubst < "${NGINX_CONF_PATH}/nginx.conf.template" > "${NGINX_CONF_PATH}/nginx.conf"
-    mv "${NGINX_CONF_PATH}/mime.types.template" "${NGINX_CONF_PATH}/mime.types"
+    file_move_if_exists "${NGINX_CONF_PATH}/mime.types.template" "${NGINX_CONF_PATH}/mime.types"
 }
