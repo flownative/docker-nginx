@@ -26,8 +26,6 @@ RUN install_packages \
     nginx-common=${NGINX_VERSION} \
     nginx-extras=${NGINX_VERSION} \
     gettext \
-    curl \
-    procps \
     && rm /etc/nginx/sites-available/default \
     && rm /etc/nginx/sites-enabled/default
 
