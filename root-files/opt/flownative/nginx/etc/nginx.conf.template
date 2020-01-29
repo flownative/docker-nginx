@@ -1,9 +1,8 @@
-user beach;
+daemon off;
 worker_processes  auto;
 
-error_log  stderr notice;
-
-pid /var/run/nginx.pid;
+pid ${NGINX_TMP_PATH}/nginx.pid;
+error_log ${NGINX_LOG_PATH}/error.log notice;
 
 events {
     multi_accept on;
@@ -12,7 +11,13 @@ events {
 }
 
 http {
-    include /etc/nginx/mime.types;
+    client_body_temp_path  "${NGINX_TMP_PATH}/client_body" 1 2;
+    proxy_temp_path "${NGINX_TMP_PATH}/proxy" 1 2;
+    fastcgi_temp_path "${NGINX_TMP_PATH}/fastcgi" 1 2;
+    scgi_temp_path "${NGINX_TMP_PATH}/scgi" 1 2;
+    uwsgi_temp_path "${NGINX_TMP_PATH}/uwsgi" 1 2;
+
+    include ${NGINX_CONF_PATH}/mime.types;
     default_type application/octet-stream;
 
     sendfile on;
@@ -52,7 +57,6 @@ http {
 
     server_tokens off;
 
-    include /etc/nginx/conf.d/*.conf;
-    include /etc/nginx/sites-enabled/*.conf;
-    include /etc/nginx/sites-enabled/*/*.conf;
+    include ${NGINX_CONF_PATH}/sites-enabled/*.conf;
+    include ${NGINX_CONF_PATH}/sites-enabled/*/*.conf;
 }
