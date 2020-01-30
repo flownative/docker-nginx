@@ -14,6 +14,7 @@ eval "$(nginx_legacy_env)"
 if [[ "$*" = *"/run.sh"* ]]; then
     nginx_initialize
     nginx_legacy_initialize
-fi
 
+    trap nginx_stop EXIT
+fi
 exec "$@"

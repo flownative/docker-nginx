@@ -19,13 +19,20 @@ ENV FLOWNATIVE_LIB_PATH=/opt/flownative/lib \
 
 COPY --from=docker.pkg.github.com/flownative/bash-library/bash-library:1 /lib $FLOWNATIVE_LIB_PATH
 
-# Note: We need nginx-extras for the chunkin and more headers module and apache2-utils for the htpasswd command.
-#       The gettext package provides "envsubst" for templating.
+# Packages are needed for the following reasons:
+#
+# nginx-common      Nginx
+# nginx-extras      chunkin and headers module for Nginx
+# ca-certificates   Up to date CA certificates for validation
+# gettext           contains envsubst, used for rendering configuration files
+# procps            Process functions used for checking running status and stopping Nginx
+
 RUN install_packages \
-    ca-certificates \
     nginx-common=${NGINX_VERSION} \
     nginx-extras=${NGINX_VERSION} \
+    ca-certificates \
     gettext \
+    procps \
     && rm /etc/nginx/sites-available/default \
     && rm /etc/nginx/sites-enabled/default
 

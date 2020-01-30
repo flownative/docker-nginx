@@ -12,5 +12,5 @@ set -o pipefail
 # Load Nginx environment variables
 eval "$(nginx_env)"
 
-info "Starting Nginx ..."
-with_backoff "${NGINX_BASE_PATH}/sbin/nginx -c ${NGINX_CONF_PATH}/nginx.conf"
+# Start Nginx
+with_backoff nginx_start
