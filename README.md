@@ -52,6 +52,11 @@ I have no name!@5a0adf17e426:/$ whoami
 whoami: cannot find name for user ID 1000
 ```
 
+Because Nginx runs as a non-root user, it cannot bind to port 80 and users port 8080
+instead. Since you can map that port to any other port by telling Docker or Kubernetes,
+this won't be a problem in practice. However, be aware that you need to specify 8080
+as the container port – otherwise you won't get a connection.
+
 ## Building this image
 
 Build this image with `docker build`. You need to specify the desired version for some
