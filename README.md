@@ -10,7 +10,7 @@ A Docker image providing [Nginx](https://nginx.org) for [Beach](https://www.flow
 Nginx images, this one provides specific features which come in handy for running a
 [Neos CMS](https://www.neos.io) instance.
 
-## tl;dr;
+## tl;dr
 
 ```bash
 $ docker run --name nginx flownative/nginx:latest
