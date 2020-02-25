@@ -93,11 +93,6 @@ server {
         access_log off;
     }
 
-    location = /robots.txt {
-        log_not_found off;
-        access_log off;
-    }
-
     add_header Via '\$hostname';
 
     location ~ \\.php\$ {
