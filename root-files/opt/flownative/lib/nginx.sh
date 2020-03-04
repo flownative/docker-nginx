@@ -56,15 +56,8 @@ nginx_start() {
     trap 'nginx_stop' EXIT
 
     info "Nginx: Starting ..."
-    "${NGINX_BASE_PATH}/sbin/nginx" -c "${NGINX_CONF_PATH}/nginx.conf" &
 
-    sleep 1
-    while [ ! -f "${NGINX_TMP_PATH}/nginx.pid" ]; do
-        info "Nginx: Waiting for nginx.pid to appear"
-        sleep 1
-    done
-
-    info "Nginx: Running as process #$(nginx_get_pid)"
+    with_backoff "${NGINX_BASE_PATH}/sbin/nginx -c ${NGINX_CONF_PATH}/nginx.conf" || error "Nginx: Failed starting process"
 }
 
 # ---------------------------------------------------------------------------------------

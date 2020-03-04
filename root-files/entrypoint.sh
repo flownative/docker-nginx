@@ -18,9 +18,7 @@ if [[ "$*" = *"run"* ]]; then
     nginx_initialize
     nginx_legacy_initialize
     nginx_start
-
-    wait "$(nginx_get_pid)"
-    # This line will not be reached, because a trap handles termination
+    # This line will be reached only after Nginx was stopped
 else
     "$@"
 fi
