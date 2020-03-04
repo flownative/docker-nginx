@@ -61,12 +61,12 @@ EOF
 # @return void
 #
 nginx_legacy_initialize() {
-    info "Setting up Nginx site configuration ..."
+    info "Nginx: Setting up site configuration ..."
 
-    info "Nginx mode is ${BEACH_NGINX_MODE}"
+    info "Nginx: Mode is ${BEACH_NGINX_MODE}"
 
     if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
-        info "Enabling Flow site configuration ..."
+        info "Nginx: Enabling Flow site configuration ..."
         cat > "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM
 
 server {
@@ -105,7 +105,7 @@ server {
 
 EOM
         if [ -n "${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET}" ]; then
-        info "Enabling custom error page pointing to ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET} ..."
+        info "Nginx: Enabling custom error page pointing to ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET} ..."
         cat >> "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM
            fastcgi_intercept_errors on;
            error_page 500 501 502 503 ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET};
@@ -164,7 +164,7 @@ EOM
 EOM
 
     else
-        info "Enabling default site configuration ..."
+        info "Nginx: Enabling default site configuration ..."
         cat > "${NGINX_CONF_PATH}/sites-enabled/default.conf" <<- EOM
 server {
     listen *:8080 default_server;
@@ -181,7 +181,7 @@ EOM
     fi
 
     if [ "${BEACH_NGINX_STATUS_ENABLE}" == "true" ]; then
-        info "Enabling status endpoint /status on port ${BEACH_NGINX_STATUS_PORT} ..."
+        info "Nginx: Enabling status endpoint / status on port ${BEACH_NGINX_STATUS_PORT} ..."
         cat > "${NGINX_CONF_PATH}/sites-enabled/status.conf" <<- EOM
 server {
 
@@ -201,7 +201,7 @@ server {
 EOM
 
       if [ "${BEACH_NGINX_CUSTOM_METRICS_ENABLE}" == "true" ]; then
-          info "Enabling custom metrics endpoint on port ${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT} ..."
+          info "Nginx: Enabling custom metrics endpoint on port ${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT} ..."
           cat > "${NGINX_CONF_PATH}/sites-enabled/custom_metrics.conf" <<- EOM
 server {
     listen *:${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT};

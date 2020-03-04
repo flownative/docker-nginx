@@ -24,6 +24,7 @@ export NGINX_BASE_PATH="${NGINX_BASE_PATH}"
 export NGINX_CONF_PATH="${NGINX_CONF_PATH:-${NGINX_BASE_PATH}/etc}"
 export NGINX_TMP_PATH="${NGINX_TMP_PATH:-${NGINX_BASE_PATH}/tmp}"
 export NGINX_LOG_PATH="${NGINX_LOG_PATH:-${NGINX_BASE_PATH}/log}"
+export NGINX_LOG_LEVEL="${NGINX_LOG_LEVEL:-warn}"
 EOF
 }
 
@@ -51,14 +52,19 @@ nginx_get_pid() {
 # @return void
 #
 nginx_start() {
-    if [ -f "${NGINX_TMP_PATH}/nginx.stopping" ]; then
-        info "Skipping re-start of Nginx because it is currently being stopped"
-        return
-    fi
+    local pid
+    trap 'nginx_stop' EXIT
 
-    info "Starting Nginx ..."
+    info "Nginx: Starting ..."
+    "${NGINX_BASE_PATH}/sbin/nginx" -c "${NGINX_CONF_PATH}/nginx.conf" &
 
-    "${NGINX_BASE_PATH}/sbin/nginx" -c "${NGINX_CONF_PATH}/nginx.conf"
+    sleep 1
+    while [ ! -f "${NGINX_TMP_PATH}/nginx.pid" ]; do
+        info "Nginx: Waiting for nginx.pid to appear"
+        sleep 1
+    done
+
+    info "Nginx: Running as process #$(nginx_get_pid)"
 }
 
 # ---------------------------------------------------------------------------------------
@@ -68,15 +74,8 @@ nginx_start() {
 # @return void
 #
 nginx_stop() {
-    local pid
-    pid=$(nginx_get_pid)
-
-    is_process_running "${pid}" || (info "Could not stop nginx, because the process was not running (detected pid: ${pid})" && return);
-
-    info "Stopping nginx (pid ${pid}) ..."
-
-    touch "${NGINX_TMP_PATH}/nginx.stopping"
-    process_stop "${pid}"
+    info "Nginx: Stopping ..."
+    # Nginx reacts to signals automatically, so no need for us to stop it explicitly
 }
 
 # ---------------------------------------------------------------------------------------
@@ -96,11 +95,10 @@ nginx_stop() {
 # @return void
 #
 nginx_initialize() {
-    info "Initializing Nginx ..."
+    info "Nginx: Initializing ..."
 
 #    nginx_conf_validate
 
-    rm -f "${NGINX_TMP_PATH}/nginx.pid" "${NGINX_TMP_PATH}/nginx.stopping"
     envsubst < "${NGINX_CONF_PATH}/nginx.conf.template" > "${NGINX_CONF_PATH}/nginx.conf"
     file_move_if_exists "${NGINX_CONF_PATH}/mime.types.template" "${NGINX_CONF_PATH}/mime.types"
 }

@@ -26,7 +26,16 @@ tbd.
 
 ## Configuration
 
-tbd.
+### Logging
+
+By default, the access log is written to STDOUT and the error log is redirected to STDERR.
+That way, you can follow logs by watching container logs with `docker logs` or using a
+similar mechanism in Kubernetes or your actual platform.
+
+The log level for error can be defined via the `NGINX_LOG_LEVEL` environment variable.
+See the [Nginx documentation](https://docs.nginx.com/nginx/admin-guide/monitoring/logging/)
+for possible values. The default value is `warn`.
+
 
 ## Security aspects
 
