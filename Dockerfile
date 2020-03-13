@@ -24,14 +24,12 @@ COPY --from=docker.pkg.github.com/flownative/bash-library/bash-library:1 /lib $F
 # nginx-common      Nginx
 # nginx-extras      chunkin and headers module for Nginx
 # ca-certificates   Up to date CA certificates for validation
-# gettext           contains envsubst, used for rendering configuration files
 # procps            Process functions used for checking running status and stopping Nginx
 
 RUN install_packages \
     nginx-common=${NGINX_VERSION} \
     nginx-extras=${NGINX_VERSION} \
     ca-certificates \
-    gettext \
     procps \
     && rm /etc/nginx/sites-available/default \
     && rm /etc/nginx/sites-enabled/default
@@ -41,6 +39,6 @@ RUN /build.sh
 
 EXPOSE 8080
 
-USER 1000
+USER nginx
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "run" ]
