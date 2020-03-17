@@ -122,17 +122,8 @@ EOM
 
 EOM
         if is_boolean_yes "${NGINX_CACHE_ENABLE}"; then
-        info "Nginx: Enabling FastCGI cache ..."
-        cat >> "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM
-           fastcgi_cache ${NGINX_CACHE_NAME};
-           fastcgi_cache_methods GET HEAD;
-           fastcgi_cache_key \$request_method\$scheme\$host\$request_uri;
-           fastcgi_cache_valid 200 301 302 ${NGINX_CACHE_DEFAULT_LIFETIME};
-           fastcgi_cache_use_stale ${NGINX_CACHE_USE_STALE_OPTIONS};
-           fastcgi_cache_background_update ${NGINX_CACHE_BACKGROUND_UPDATE};
-
-           add_header X-Nginx-Cache \$upstream_cache_status;
-EOM
+            info "Nginx: Enabling FastCGI cache ..."
+            nginx_config_fastcgi_cache >> "${NGINX_CONF_PATH}/sites-enabled/site.conf"
         fi
 
         cat >> "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM

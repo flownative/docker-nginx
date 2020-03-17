@@ -21,9 +21,9 @@
 nginx_env() {
     cat <<"EOF"
 export NGINX_BASE_PATH="${NGINX_BASE_PATH}"
-export NGINX_CONF_PATH="${NGINX_CONF_PATH:-${NGINX_BASE_PATH}/etc}"
-export NGINX_TMP_PATH="${NGINX_TMP_PATH:-${NGINX_BASE_PATH}/tmp}"
-export NGINX_LOG_PATH="${NGINX_LOG_PATH:-${NGINX_BASE_PATH}/log}"
+export NGINX_CONF_PATH="${NGINX_BASE_PATH}/etc"
+export NGINX_TMP_PATH="${NGINX_BASE_PATH}/tmp"
+export NGINX_LOG_PATH="${NGINX_BASE_PATH}/log"
 export NGINX_LOG_LEVEL="${NGINX_LOG_LEVEL:-warn}"
 
 export NGINX_CACHE_PATH="${NGINX_CACHE_PATH:-${NGINX_BASE_PATH}/cache}"
@@ -80,6 +80,25 @@ nginx_start() {
 nginx_stop() {
     info "Nginx: Stopping ..."
     # Nginx reacts to signals automatically, so no need for us to stop it explicitly
+}
+
+# ---------------------------------------------------------------------------------------
+# nginx_config_fastcgi_cache() - Renders FastCGI configuration for a location block
+#
+# @global NGINX_* The NGINX_ evnironment variables
+# @return void
+#
+nginx_config_fastcgi_cache() {
+    cat << EOM
+           fastcgi_cache ${NGINX_CACHE_NAME};
+           fastcgi_cache_methods GET HEAD;
+           fastcgi_cache_key \$request_method\$scheme\$host\$request_uri;
+           fastcgi_cache_valid 200 301 302 ${NGINX_CACHE_DEFAULT_LIFETIME};
+           fastcgi_cache_use_stale ${NGINX_CACHE_USE_STALE_OPTIONS};
+           fastcgi_cache_background_update ${NGINX_CACHE_BACKGROUND_UPDATE};
+
+           add_header X-Nginx-Cache \$upstream_cache_status;
+EOM
 }
 
 # ---------------------------------------------------------------------------------------
