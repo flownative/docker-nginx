@@ -34,6 +34,8 @@ export NGINX_CACHE_MAX_SIZE="${NGINX_CACHE_MAX_SIZE:-1024m}"
 export NGINX_CACHE_INACTIVE="${NGINX_CACHE_INACTIVE:-1h}"
 export NGINX_CACHE_USE_STALE_OPTIONS="${NGINX_CACHE_USE_STALE_OPTIONS:-updating error timeout invalid_header}"
 export NGINX_CACHE_BACKGROUND_UPDATE="${NGINX_CACHE_BACKGROUND_UPDATE:-off}"
+
+export NGINX_CUSTOM_ERROR_PAGE_TARGET="${NGINX_CUSTOM_ERROR_PAGE_TARGET:-}"
 EOF
 }
 
@@ -78,6 +80,19 @@ nginx_start() {
 nginx_stop() {
     info "Nginx: Stopping ..."
     # Nginx reacts to signals automatically, so no need for us to stop it explicitly
+}
+
+# ---------------------------------------------------------------------------------------
+# nginx_config_fastcgi_custom_error_page() - Renders custom error page config for a location block
+#
+# @global NGINX_* The NGINX_ evnironment variables
+# @return void
+#
+nginx_config_fastcgi_custom_error_page() {
+        cat << EOM
+           fastcgi_intercept_errors on;
+           error_page ${NGINX_CUSTOM_ERROR_PAGE_CODES} ${NGINX_CUSTOM_ERROR_PAGE_TARGET};
+EOM
 }
 
 # ---------------------------------------------------------------------------------------

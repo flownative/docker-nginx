@@ -13,6 +13,7 @@
 
 . "${FLOWNATIVE_LIB_PATH}/validation.sh"
 . "${FLOWNATIVE_LIB_PATH}/log.sh"
+. "${FLOWNATIVE_LIB_PATH}/nginx.sh"
 
 # ---------------------------------------------------------------------------------------
 # nginx_legacy_env() - Load global environment variables for configuring Nginx
@@ -51,7 +52,7 @@ export BEACH_NGINX_CUSTOM_METRICS_ENABLE=${BEACH_NGINX_CUSTOM_METRICS_ENABLE:-fa
 export BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH=${BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH:-/metrics}
 export BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT=${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT:-8082}
 
-export BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET=${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET:-}
+export NGINX_CUSTOM_ERROR_PAGE_TARGET=${NGINX_CUSTOM_ERROR_PAGE_TARGET:-${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET:-}}
 EOF
 }
 
@@ -105,12 +106,9 @@ server {
            fastcgi_index index.php;
 
 EOM
-        if [ -n "${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET}" ]; then
-        info "Nginx: Enabling custom error page pointing to ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET} ..."
-        cat >> "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM
-           fastcgi_intercept_errors on;
-           error_page 500 501 502 503 ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET};
-EOM
+        if [ -n "${NGINX_CUSTOM_ERROR_PAGE_TARGET}" ]; then
+            info "Nginx: Enabling custom error page pointing to ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET} ..."
+            nginx_config_fastcgi_custom_error_page >> "${NGINX_CONF_PATH}/sites-enabled/site.conf"
         fi
         cat >> "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM
            fastcgi_param FLOW_CONTEXT ${BEACH_FLOW_CONTEXT};
