@@ -24,7 +24,7 @@ export NGINX_BASE_PATH="${NGINX_BASE_PATH}"
 export NGINX_CONF_PATH="${NGINX_BASE_PATH}/etc"
 export NGINX_TMP_PATH="${NGINX_BASE_PATH}/tmp"
 export NGINX_LOG_PATH="${NGINX_BASE_PATH}/log"
-export NGINX_LOG_LEVEL="${NGINX_LOG_LEVEL:-warn}"
+export NGINX_LOG_LEVEL="${NGINX_LOG_LEVEL:-info}"
 
 export NGINX_CACHE_PATH="${NGINX_CACHE_PATH:-${NGINX_BASE_PATH}/cache}"
 export NGINX_CACHE_ENABLE="${NGINX_CACHE_ENABLE:-no}"
@@ -38,49 +38,6 @@ export NGINX_CACHE_BACKGROUND_UPDATE="${NGINX_CACHE_BACKGROUND_UPDATE:-off}"
 export NGINX_CUSTOM_ERROR_PAGE_CODES="${NGINX_CUSTOM_ERROR_PAGE_CODES:-500 501 502 503}"
 export NGINX_CUSTOM_ERROR_PAGE_TARGET="${NGINX_CUSTOM_ERROR_PAGE_TARGET:-}"
 EOF
-}
-
-# ---------------------------------------------------------------------------------------
-# nginx_get_pid() - Return the nginx process id
-#
-# @global NGINX_* The NGINX_ evnironment variables
-# @return Returns the Nginx process id, if it is running, otherwise 0
-#
-nginx_get_pid() {
-    local pid
-    pid=$(process_get_pid_from_file "${NGINX_TMP_PATH}/nginx.pid")
-
-    if [[ -n "${pid}" ]]; then
-        echo "${pid}"
-    else
-        false
-    fi
-}
-
-# ---------------------------------------------------------------------------------------
-# nginx_start() - Start Nginx
-#
-# @global NGINX_* The NGINX_ evnironment variables
-# @return void
-#
-nginx_start() {
-    local pid
-    trap 'nginx_stop' EXIT
-
-    info "Nginx: Starting ..."
-
-    with_backoff "${NGINX_BASE_PATH}/sbin/nginx -c ${NGINX_CONF_PATH}/nginx.conf" || error "Nginx: Failed starting process"
-}
-
-# ---------------------------------------------------------------------------------------
-# nginx_stop() - Stop the nginx process based on the current PID
-#
-# @global NGINX_* The NGINX_ evnironment variables
-# @return void
-#
-nginx_stop() {
-    info "Nginx: Stopping ..."
-    # Nginx reacts to signals automatically, so no need for us to stop it explicitly
 }
 
 # ---------------------------------------------------------------------------------------
@@ -134,8 +91,10 @@ EOM
 nginx_initialize() {
     info "Nginx: Initializing ..."
 
-#    nginx_conf_validate
-
     envsubst < "${NGINX_CONF_PATH}/nginx.conf.template" > "${NGINX_CONF_PATH}/nginx.conf"
     file_move_if_exists "${NGINX_CONF_PATH}/mime.types.template" "${NGINX_CONF_PATH}/mime.types"
+
+    # Create a file descriptor for the Nginx stdout output and clean up the log
+    # lines a bit:
+    exec 4> >(sed -e "s/^\([0-9\/-]* [0-9:,]*\)/\1     OUTPUT Nginx:/")
 }

@@ -2,7 +2,7 @@ daemon off;
 worker_processes  auto;
 
 pid ${NGINX_TMP_PATH}/nginx.pid;
-error_log ${NGINX_LOG_PATH}/error.log ${NGINX_LOG_LEVEL};
+error_log /dev/stderr ${NGINX_LOG_LEVEL};
 
 events {
     multi_accept on;
