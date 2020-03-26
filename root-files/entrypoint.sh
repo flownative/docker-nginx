@@ -33,4 +33,3 @@ if [[ "$*" = *"run"* ]]; then
 else
     "$@"
 fi
-\033[38;5;7mOUTPUT ${message}\033[0m
