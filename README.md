@@ -56,6 +56,7 @@ for possible values. The default value is `warn`.
 | BEACH_NGINX_CUSTOM_METRICS_ENABLE      | boolean | no                                    | If support for a custom metrics endpoint should be enabled                                          |
 | BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH | string  | /metrics                              | Path where metrics are located                                                                      |
 | BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT | integer | 8082                                  | Port at which Nginx should listen to provide the metrics for scraping                               |
+| FLOW_HTTP_TRUSTED_PROXIES              | string  | 10.0.0.0/8                            | Nginx passes FLOW_HTTP_TRUSTED_PROXIES to the virtual host using the value of this variable         |
 
 ## Security aspects
 
@@ -70,18 +71,6 @@ escalation:
 
 ```yaml
 $ docker run flownative/nginx:latest --security-opt=no-new-privileges
-```
-
-When you exec into this container running bash, you will notice your
-prompt claiming "I have no name!". That's nothing to worry about: The
-container runs as a user with uid 1000, but in fact that user does not
-even exist. Some platforms will even assign a random uid, so it wouldn't
-be feasible to create a named user for that purpose:
-
-```
-$ docker run -ti --name nginx --rm flownative/nginx:latest bash
-I have no name!@5a0adf17e426:/$ whoami
-whoami: cannot find name for user ID 1000
 ```
 
 Because Nginx runs as a non-root user, it cannot bind to port 80 and

@@ -32,7 +32,10 @@ if [ -z "${BEACH_FLOW_SUB_CONTEXT}" ]; then
 else
     export BEACH_FLOW_CONTEXT=${BEACH_FLOW_BASE_CONTEXT}/Beach/${BEACH_FLOW_SUB_CONTEXT}
 fi
-export BEACH_FLOW_HTTP_TRUSTED_PROXIES=${BEACH_FLOW_HTTP_TRUSTED_PROXIES:-10.0.0.0/8}
+
+if [ -z "${FLOW_HTTP_TRUSTED_PROXIES}" ]; then
+    export FLOW_HTTP_TRUSTED_PROXIES=${BEACH_FLOW_HTTP_TRUSTED_PROXIES:-10.0.0.0/8}
+fi
 
 export BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET=${BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET:-}
 if [ -z "${BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET}" ]; then
@@ -114,7 +117,7 @@ EOM
            fastcgi_param FLOW_CONTEXT ${BEACH_FLOW_CONTEXT};
            fastcgi_param FLOW_REWRITEURLS 1;
            fastcgi_param FLOW_ROOTPATH ${BEACH_APPLICATION_PATH};
-           fastcgi_param FLOW_HTTP_TRUSTED_PROXIES ${BEACH_FLOW_HTTP_TRUSTED_PROXIES};
+           fastcgi_param FLOW_HTTP_TRUSTED_PROXIES ${FLOW_HTTP_TRUSTED_PROXIES};
 
            fastcgi_split_path_info ^(.+\\.php)(.*)\$;
            fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
@@ -234,7 +237,7 @@ server {
         fastcgi_param FLOW_CONTEXT ${BEACH_FLOW_CONTEXT};
         fastcgi_param FLOW_REWRITEURLS 1;
         fastcgi_param FLOW_ROOTPATH ${BEACH_APPLICATION_PATH};
-        fastcgi_param FLOW_HTTP_TRUSTED_PROXIES ${BEACH_FLOW_HTTP_TRUSTED_PROXIES};
+        fastcgi_param FLOW_HTTP_TRUSTED_PROXIES ${FLOW_HTTP_TRUSTED_PROXIES};
 
         fastcgi_param FLOWNATIVE_PROMETHEUS_ENABLE true;
 
