@@ -57,23 +57,21 @@ export BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH=${BEACH_NGINX_CUSTOM_METRICS_SOURC
 export BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT=${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT:-8082}
 
 export NGINX_CUSTOM_ERROR_PAGE_TARGET=${NGINX_CUSTOM_ERROR_PAGE_TARGET:-${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET:-}}
+
+export NGINX_UPSTREAM_HOST=${NGINX_UPSTREAM_HOST:-127.0.0.1}
+export NGINX_UPSTREAM_PORT=${NGINX_UPSTREAM_PORT:-3000}
 EOF
 }
 
 # ---------------------------------------------------------------------------------------
-# nginx_legacy_initialize() - Set up Nginx configuration an server block / site
+# nginx_legacy_initialize_flow() - Set up Nginx configuration for a Flow application
 #
 # @global NGINX_* The NGINX_* environment variables
 # @return void
 #
-nginx_legacy_initialize() {
-    info "Nginx: Setting up site configuration ..."
-
-    info "Nginx: Mode is ${BEACH_NGINX_MODE}"
-
-    if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
-        info "Nginx: Enabling Flow site configuration ..."
-        cat > "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM
+nginx_legacy_initialize_flow() {
+    info "Nginx: Enabling Flow site configuration ..."
+    cat >"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
 
 server {
     listen *:8080 default_server;
@@ -110,11 +108,11 @@ server {
            fastcgi_index index.php;
 
 EOM
-        if [ -n "${NGINX_CUSTOM_ERROR_PAGE_TARGET}" ]; then
-            info "Nginx: Enabling custom error page pointing to ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET} ..."
-            nginx_config_fastcgi_custom_error_page >> "${NGINX_CONF_PATH}/sites-enabled/site.conf"
-        fi
-        cat >> "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM
+    if [ -n "${NGINX_CUSTOM_ERROR_PAGE_TARGET}" ]; then
+        info "Nginx: Enabling custom error page pointing to ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET} ..."
+        nginx_config_fastcgi_custom_error_page >>"${NGINX_CONF_PATH}/sites-enabled/site.conf"
+    fi
+    cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
            fastcgi_param FLOW_CONTEXT ${BEACH_FLOW_CONTEXT};
            fastcgi_param FLOW_REWRITEURLS 1;
            fastcgi_param FLOW_ROOTPATH ${BEACH_APPLICATION_PATH};
@@ -125,25 +123,25 @@ EOM
            fastcgi_param PATH_INFO \$fastcgi_path_info;
 
 EOM
-        if is_boolean_yes "${NGINX_CACHE_ENABLE}"; then
-            info "Nginx: Enabling FastCGI cache ..."
-            nginx_config_fastcgi_cache >> "${NGINX_CONF_PATH}/sites-enabled/site.conf"
-        fi
+    if is_boolean_yes "${NGINX_CACHE_ENABLE}"; then
+        info "Nginx: Enabling FastCGI cache ..."
+        nginx_config_fastcgi_cache >>"${NGINX_CONF_PATH}/sites-enabled/site.conf"
+    fi
 
-        cat >> "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM
+    cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     }
 EOM
 
-        if [ -n "${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}" ]; then
-            cat >> "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM
+    if [ -n "${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}" ]; then
+        cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     location ~* ^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]+)/ {
         resolver 8.8.8.8;
         proxy_set_header Authorization "";
         proxy_pass http://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1\$is_args\$args;
     }
 EOM
-        elif [ -n "${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}" ]; then
-            cat >> "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM
+    elif [ -n "${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}" ]; then
+        cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     location ~* ^/_Resources/Persistent/(.*)$ {
         access_log off;
         expires max;
@@ -158,9 +156,9 @@ EOM
     }
 EOM
 
-        fi
+    fi
 
-        cat >> "${NGINX_CONF_PATH}/sites-enabled/site.conf" <<- EOM
+    cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     # everything is tried as file first, then passed on to index.php (i.e. Flow)
     location / {
         try_files \$uri /index.php?\$args;
@@ -173,10 +171,48 @@ EOM
     }
 }
 EOM
+}
 
-    else
-        info "Nginx: Enabling default site configuration ..."
-        cat > "${NGINX_CONF_PATH}/sites-enabled/default.conf" <<- EOM
+# ---------------------------------------------------------------------------------------
+# nginx_legacy_initialize_nodejs() - Set up Nginx configuration for NodeJS
+#
+# @global NGINX_* The NGINX_* environment variables
+# @return void
+#
+nginx_legacy_initialize_nodejs() {
+    info "Nginx: Enabling site configuration for NodeJS ..."
+    cat >"${NGINX_CONF_PATH}/sites-enabled/nodejs.conf" <<-EOM
+upstream nodejs {
+    server ${NGINX_UPSTREAM_HOST}:${NGINX_UPSTREAM_PORT};
+    keepalive 8;
+}
+
+server {
+    listen *:8080 default_server;
+
+    add_header Via '\$hostname';
+
+    location / {
+    proxy_set_header X-Real-IP \$remote_addr;
+      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+      proxy_set_header Host \$http_host;
+
+      proxy_pass http://nodejs/;
+      proxy_redirect off;
+    }
+}
+EOM
+}
+
+# ---------------------------------------------------------------------------------------
+# nginx_legacy_initialize_static() - Set up Nginx configuration for a static site
+#
+# @global NGINX_* The NGINX_* environment variables
+# @return void
+#
+nginx_legacy_initialize_static() {
+    info "Nginx: Enabling default site configuration ..."
+    cat >"${NGINX_CONF_PATH}/sites-enabled/default.conf" <<-EOM
 server {
     listen *:8080 default_server;
 
@@ -189,11 +225,18 @@ server {
     }
 }
 EOM
-    fi
+}
 
-    if [ "${BEACH_NGINX_STATUS_ENABLE}" == "true" ]; then
+# ---------------------------------------------------------------------------------------
+# nginx_legacy_initialize_status() - Set up Nginx configuration an server block / site
+#
+# @global NGINX_* The NGINX_* environment variables
+# @global BEACH_* The BEACH_* environment variables
+# @return void
+#
+nginx_legacy_initialize_status() {
         info "Nginx: Enabling status endpoint / status on port ${BEACH_NGINX_STATUS_PORT} ..."
-        cat > "${NGINX_CONF_PATH}/sites-enabled/status.conf" <<- EOM
+        cat >"${NGINX_CONF_PATH}/sites-enabled/status.conf" <<-EOM
 server {
 
     listen *:${BEACH_NGINX_STATUS_PORT};
@@ -211,9 +254,9 @@ server {
 }
 EOM
 
-      if [ "${BEACH_NGINX_CUSTOM_METRICS_ENABLE}" == "true" ]; then
-          info "Nginx: Enabling custom metrics endpoint on port ${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT} ..."
-          cat > "${NGINX_CONF_PATH}/sites-enabled/custom_metrics.conf" <<- EOM
+        if [ "${BEACH_NGINX_CUSTOM_METRICS_ENABLE}" == "true" ]; then
+            info "Nginx: Enabling custom metrics endpoint on port ${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT} ..."
+            cat >"${NGINX_CONF_PATH}/sites-enabled/custom_metrics.conf" <<-EOM
 server {
     listen *:${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT};
 
@@ -249,6 +292,29 @@ server {
 }
 EOM
 
-      fi
+        fi
+}
+
+# ---------------------------------------------------------------------------------------
+# nginx_legacy_initialize() - Set up Nginx configuration an server block / site
+#
+# @global NGINX_* The NGINX_* environment variables
+# @return void
+#
+nginx_legacy_initialize() {
+    info "Nginx: Setting up site configuration ..."
+
+    info "Nginx: Mode is ${BEACH_NGINX_MODE}"
+
+    if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
+        nginx_legacy_initialize_flow
+    elif [ "$BEACH_NGINX_MODE" == "NodeJS" ]; then
+        nginx_legacy_initialize_nodejs
+    else
+        nginx_legacy_initialize_static
+    fi
+
+    if [ "${BEACH_NGINX_STATUS_ENABLE}" == "true" ]; then
+        nginx_legacy_initialize_status
     fi
 }
