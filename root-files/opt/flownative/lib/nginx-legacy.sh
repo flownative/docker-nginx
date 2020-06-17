@@ -58,8 +58,7 @@ export BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT=${BEACH_NGINX_CUSTOM_METRICS_TARGE
 
 export NGINX_CUSTOM_ERROR_PAGE_TARGET=${NGINX_CUSTOM_ERROR_PAGE_TARGET:-${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET:-}}
 
-export NGINX_UPSTREAM_HOST=${NGINX_UPSTREAM_HOST:-127.0.0.1}
-export NGINX_UPSTREAM_PORT=${NGINX_UPSTREAM_PORT:-3000}
+export NGINX_STATIC_ROOT=${NGINX_STATIC_ROOT:-/var/www/html}
 EOF
 }
 
@@ -174,49 +173,18 @@ EOM
 }
 
 # ---------------------------------------------------------------------------------------
-# nginx_legacy_initialize_nodejs() - Set up Nginx configuration for NodeJS
-#
-# @global NGINX_* The NGINX_* environment variables
-# @return void
-#
-nginx_legacy_initialize_nodejs() {
-    info "Nginx: Enabling site configuration for NodeJS ..."
-    cat >"${NGINX_CONF_PATH}/sites-enabled/nodejs.conf" <<-EOM
-upstream nodejs {
-    server ${NGINX_UPSTREAM_HOST}:${NGINX_UPSTREAM_PORT};
-    keepalive 8;
-}
-
-server {
-    listen *:8080 default_server;
-
-    add_header Via '\$hostname';
-
-    location / {
-    proxy_set_header X-Real-IP \$remote_addr;
-      proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-      proxy_set_header Host \$http_host;
-
-      proxy_pass http://nodejs/;
-      proxy_redirect off;
-    }
-}
-EOM
-}
-
-# ---------------------------------------------------------------------------------------
 # nginx_legacy_initialize_static() - Set up Nginx configuration for a static site
 #
 # @global NGINX_* The NGINX_* environment variables
 # @return void
 #
 nginx_legacy_initialize_static() {
-    info "Nginx: Enabling default site configuration ..."
+    info "Nginx: Enabling static site configuration with root at ${NGINX_STATIC_ROOT} ..."
     cat >"${NGINX_CONF_PATH}/sites-enabled/default.conf" <<-EOM
 server {
     listen *:8080 default_server;
 
-    root /var/www/html;
+    root ${NGINX_STATIC_ROOT};
 
     # deny files starting with a dot (having "/." in the path)
     location ~ /\\. {
@@ -308,8 +276,6 @@ nginx_legacy_initialize() {
 
     if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
         nginx_legacy_initialize_flow
-    elif [ "$BEACH_NGINX_MODE" == "NodeJS" ]; then
-        nginx_legacy_initialize_nodejs
     else
         nginx_legacy_initialize_static
     fi

@@ -22,7 +22,12 @@ tbd.
 
 ## Hosting a static website
 
-tbd.
+Set the environment variable "BEACH_NGINX_MODE" to "Static" and
+optionally set the variable "NGINX_STATIC_ROOT" to the path leading to
+the root of your static site.
+
+The BEACH_NGINX_MODE variable follows legacy naming and will be renamed
+/ replaced by another concept in the future.
 
 ## Configuration
 
@@ -53,9 +58,11 @@ for possible values. The default value is `warn`.
 | NGINX_CACHE_BACKGROUND_UPDATE          | boolean | off                                   | If background updates should be enabled                                                             |
 | NGINX_CUSTOM_ERROR_PAGE_CODES          | string  | 500 501 502 503                       | FastCGI error codes which should redirect to the custom error page                                  |
 | NGINX_CUSTOM_ERROR_PAGE_TARGET         | string  |                                       | Upstream URL to use for custom FastCGI error pages                                                  |
+| NGINX_STATIC_ROOT                      | string  | /var/www/html                         | Document root path for when BEACH_NGINX_MODE is "Static"                                            |
 | BEACH_NGINX_CUSTOM_METRICS_ENABLE      | boolean | no                                    | If support for a custom metrics endpoint should be enabled                                          |
 | BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH | string  | /metrics                              | Path where metrics are located                                                                      |
 | BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT | integer | 8082                                  | Port at which Nginx should listen to provide the metrics for scraping                               |
+| BEACH_NGINX_MODE                       | string  | Flow                                  | Either "Flow" or "Static"; this variable is going to be renamed in the future                       |
 | FLOW_HTTP_TRUSTED_PROXIES              | string  | 10.0.0.0/8                            | Nginx passes FLOW_HTTP_TRUSTED_PROXIES to the virtual host using the value of this variable         |
 
 ## Security aspects
