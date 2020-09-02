@@ -14,7 +14,6 @@ ENV NGINX_VERSION ${NGINX_VERSION}
 
 ENV FLOWNATIVE_LIB_PATH=/opt/flownative/lib \
     NGINX_BASE_PATH=/opt/flownative/nginx \
-    PATH="/opt/flownative/nginx/bin:$PATH" \
     LOG_DEBUG=false
 
 USER root

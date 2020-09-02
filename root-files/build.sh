@@ -28,9 +28,9 @@ chown -R nginx:nginx \
     "${NGINX_BASE_PATH}/log" \
     "${NGINX_BASE_PATH}/tmp"
 
-# Forward request and error logs to docker log collector
-ln -sf /dev/stdout "${NGINX_BASE_PATH}/log/access.log"
-ln -sf /dev/stderr "${NGINX_BASE_PATH}/log/error.log"
+# Fix ownership of syslog-ng's etc directory because COPY in this Dockerfile
+# will reset the owner too root even though it was 1000 set by the base image:
+chown -R 1000:1000 "${SYSLOG_BASE_PATH}/etc"
 
 # Nginx will try to access /var/log/nginx once, before even reading its
 # configuration file. This results in a "permission denied" error, if
@@ -39,6 +39,7 @@ ln -sf /dev/stderr "${NGINX_BASE_PATH}/log/error.log"
 mkdir  -p /var/log/nginx
 chown -R nginx:nginx /var/log/nginx
 chmod -R g+rwX /var/log/nginx
+chown -R nginx:nginx /usr/share/nginx
 
 # For backwards-compatibility, create the /application/Web directory:
 mkdir  -p /application/Web

@@ -2,7 +2,7 @@ daemon off;
 worker_processes  auto;
 
 pid ${NGINX_TMP_PATH}/nginx.pid;
-error_log /dev/stderr ${NGINX_LOG_LEVEL};
+error_log ${FLOWNATIVE_LOG_PATH}/nginx_error.log ${NGINX_LOG_LEVEL};
 
 events {
     multi_accept on;
@@ -25,7 +25,46 @@ http {
     tcp_nopush on;
     tcp_nodelay on;
 
-    access_log off;
+    log_format  main_ext  '$remote_addr - $remote_user [$time_local] "$request" '
+                         '$status $body_bytes_sent "$http_referer" '
+                         '"$http_user_agent" "$http_x_forwarded_for" '
+                         '"$host" sn="$server_name" '
+                         'rt=$request_time '
+                         'ua="$upstream_addr" us="$upstream_status" '
+                         'ut="$upstream_response_time" ul="$upstream_response_length" '
+                         'cs=$upstream_cache_status' ;
+
+    log_format main_json escape=json '{'
+      '"msec": "$$msec", '                                               # request unixtime in seconds with a milliseconds resolution
+      '"connection": "$$connection", '                                   # connection serial number
+      '"connection_requests": "$$connection_requests", '                 # number of requests made in connection
+      '"pid": "$$pid", '                                                 # process pid
+      '"request_id": "$$request_id", '                                   # the unique request id
+      '"request_length": "$$request_length", '                           # request length (including headers and body)
+      '"remote_addr": "$$remote_addr", '                                 # client IP
+      '"remote_port": "$$remote_port", '                                 # client port
+      '"time_iso8601": "$$time_iso8601", '                               # local time in the ISO 8601 standard format
+      '"request": "$$request", '                                         # full path no arguments if the request
+      '"request_uri": "$$request_uri", '                                 # full path and arguments if the request
+      '"args": "$$args", '                                               # args
+      '"status": "$$status", '                                           # response status code
+      '"body_bytes_sent": "$$body_bytes_sent", '                         # the number of body bytes exclude headers sent to a client
+      '"bytes_sent": "$$bytes_sent", '                                   # the number of bytes sent to a client
+      '"http_referer": "$$http_referer", '                               # HTTP referer
+      '"http_user_agent": "$$http_user_agent", '                         # user agent
+      '"http_x_forwarded_for": "$$http_x_forwarded_for", '               # http_x_forwarded_for
+      '"http_host": "$$http_host", '                                     # the request Host: header
+      '"server_name": "$$server_name", '                                 # the name of the vhost serving the request
+      '"request_time": "$$request_time", '                               # request processing time in seconds with msec resolution
+      '"ssl_protocol": "$$ssl_protocol", '                               # TLS protocol
+      '"ssl_cipher": "$$ssl_cipher", '                                   # TLS cipher
+      '"scheme": "$$scheme", '                                           # http or https
+      '"request_method": "$$request_method", '                           # request method
+      '"server_protocol": "$$server_protocol"'                         # request protocol, like HTTP/1.1 or HTTP/2.0
+    '}';
+
+#    access_log ${FLOWNATIVE_LOG_PATH}/nginx_access.log main_ext buffer=256k flush=5m;
+#    access_log ${FLOWNATIVE_LOG_PATH}/nginx_access.log.json main_json buffer=256k flush=5m;
 
     client_body_buffer_size 5M;
     client_max_body_size 500M;
