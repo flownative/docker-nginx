@@ -93,7 +93,7 @@ version for some of the tools as build arguments:
 
 ```bash
 docker build \
-    --build-arg NGINX_VERSION=1.14.2-2+deb10u1 \
+    --build-arg NGINX_VERSION=1.14.2-2+deb10u3 \
     -t flownative/nginx:latest .
 ```
 
