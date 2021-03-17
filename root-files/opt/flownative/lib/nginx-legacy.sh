@@ -105,10 +105,14 @@ EOM
     if is_boolean_yes "${NGINX_STRICT_TRANSPORT_SECURITY_ENABLE}"; then
         if is_boolean_yes "${NGINX_STRICT_TRANSPORT_SECURITY_PRELOAD}"; then
             info "Nginx: Enabling Strict Transport Security with preloading ..."
+    cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
             add_header Strict-Transport-Security "max-age=31536000; preload" always;
+EOM
         else
             info "Nginx: Enabling Strict Transport Security without preloading ..."
+    cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
             add_header Strict-Transport-Security "max-age=31536000" always;
+EOM
         fi
     fi
 
