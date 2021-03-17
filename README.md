@@ -45,25 +45,27 @@ for possible values. The default value is `warn`.
 
 ### Environment variables
 
-| Variable Name                          | Type    | Default                               | Description                                                                                         |
-|:---------------------------------------|:--------|:--------------------------------------|:----------------------------------------------------------------------------------------------------|
-| NGINX_BASE_PATH                        | string  | /opt/flownative/nginx                 | Base path for Nginx                                                                                 |
-| NGINX_LOG_LEVEL                        | string  | warn                                  | Nginx log level (see [documentation](https://docs.nginx.com/nginx/admin-guide/monitoring/logging/)) |
-| NGINX_CACHE_ENABLE                     | boolean | no                                    | If the FastCGI cache should be enabled; see section about caching                                   |
-| NGINX_CACHE_NAME                       | string  | application                           | Name of the memory zone Nginx should use for caching                                                |
-| NGINX_CACHE_DEFAULT_LIFETIME           | string  | 5s                                    | Default cache lifetime to use when caching is enabled                                               |
-| NGINX_CACHE_MAX_SIZE                   | string  | 1024m                                 | Maximum memory size for the FastCGI cache                                                           |
-| NGINX_CACHE_INACTIVE                   | string  | 1h                                    | Time after which cache entries are removed automatically                                            |
-| NGINX_CACHE_USE_STALE_OPTIONS          | string  | updating error timeout invalid_header | Options to pass to the `fastcgi_cache_use_stale` directive                                          |
-| NGINX_CACHE_BACKGROUND_UPDATE          | boolean | off                                   | If background updates should be enabled                                                             |
-| NGINX_CUSTOM_ERROR_PAGE_CODES          | string  | 500 501 502 503                       | FastCGI error codes which should redirect to the custom error page                                  |
-| NGINX_CUSTOM_ERROR_PAGE_TARGET         | string  |                                       | Upstream URL to use for custom FastCGI error pages                                                  |
-| NGINX_STATIC_ROOT                      | string  | /var/www/html                         | Document root path for when BEACH_NGINX_MODE is "Static"                                            |
-| BEACH_NGINX_CUSTOM_METRICS_ENABLE      | boolean | no                                    | If support for a custom metrics endpoint should be enabled                                          |
-| BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH | string  | /metrics                              | Path where metrics are located                                                                      |
-| BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT | integer | 8082                                  | Port at which Nginx should listen to provide the metrics for scraping                               |
-| BEACH_NGINX_MODE                       | string  | Flow                                  | Either "Flow" or "Static"; this variable is going to be renamed in the future                       |
-| FLOW_HTTP_TRUSTED_PROXIES              | string  | 10.0.0.0/8                            | Nginx passes FLOW_HTTP_TRUSTED_PROXIES to the virtual host using the value of this variable         |
+| Variable Name                           | Type    | Default                               | Description                                                                                         |
+|:----------------------------------------|:--------|:--------------------------------------|:----------------------------------------------------------------------------------------------------|
+| NGINX_BASE_PATH                         | string  | /opt/flownative/nginx                 | Base path for Nginx                                                                                 |
+| NGINX_LOG_LEVEL                         | string  | warn                                  | Nginx log level (see [documentation](https://docs.nginx.com/nginx/admin-guide/monitoring/logging/)) |
+| NGINX_CACHE_ENABLE                      | boolean | no                                    | If the FastCGI cache should be enabled; see section about caching                                   |
+| NGINX_CACHE_NAME                        | string  | application                           | Name of the memory zone Nginx should use for caching                                                |
+| NGINX_CACHE_DEFAULT_LIFETIME            | string  | 5s                                    | Default cache lifetime to use when caching is enabled                                               |
+| NGINX_CACHE_MAX_SIZE                    | string  | 1024m                                 | Maximum memory size for the FastCGI cache                                                           |
+| NGINX_CACHE_INACTIVE                    | string  | 1h                                    | Time after which cache entries are removed automatically                                            |
+| NGINX_CACHE_USE_STALE_OPTIONS           | string  | updating error timeout invalid_header | Options to pass to the `fastcgi_cache_use_stale` directive                                          |
+| NGINX_CACHE_BACKGROUND_UPDATE           | boolean | off                                   | If background updates should be enabled                                                             |
+| NGINX_CUSTOM_ERROR_PAGE_CODES           | string  | 500 501 502 503                       | FastCGI error codes which should redirect to the custom error page                                  |
+| NGINX_CUSTOM_ERROR_PAGE_TARGET          | string  |                                       | Upstream URL to use for custom FastCGI error pages                                                  |
+| NGINX_STATIC_ROOT                       | string  | /var/www/html                         | Document root path for when BEACH_NGINX_MODE is "Static"                                            |
+| NGINX_STRICT_TRANSPORT_SECURITY_ENABLE  | boolean | no                                    | If Strict-Transport-Security headers should be sent (HSTS)                                          |
+| NGINX_STRICT_TRANSPORT_SECURITY_PRELOAD | boolean | no                                    | If site should be added to list of HTTPS-only sites by Google and others                            |
+| BEACH_NGINX_CUSTOM_METRICS_ENABLE       | boolean | no                                    | If support for a custom metrics endpoint should be enabled                                          |
+| BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH  | string  | /metrics                              | Path where metrics are located                                                                      |
+| BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT  | integer | 8082                                  | Port at which Nginx should listen to provide the metrics for scraping                               |
+| BEACH_NGINX_MODE                        | string  | Flow                                  | Either "Flow" or "Static"; this variable is going to be renamed in the future                       |
+| FLOW_HTTP_TRUSTED_PROXIES               | string  | 10.0.0.0/8                            | Nginx passes FLOW_HTTP_TRUSTED_PROXIES to the virtual host using the value of this variable         |
 
 ## Security aspects
 

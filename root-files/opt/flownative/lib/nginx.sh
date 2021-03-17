@@ -15,7 +15,7 @@
 # ---------------------------------------------------------------------------------------
 # nginx_env() - Load global environment variables for configuring Nginx
 #
-# @global NGINX_* The NGINX_ evnironment variables
+# @global NGINX_* The NGINX_ environment variables
 # @return "export" statements which can be passed to eval()
 #
 nginx_env() {
@@ -45,7 +45,7 @@ EOF
 # ---------------------------------------------------------------------------------------
 # nginx_config_fastcgi_cache() - Renders FastCGI configuration for a location block
 #
-# @global NGINX_* The NGINX_ evnironment variables
+# @global NGINX_* The NGINX_ environment variables
 # @return void
 #
 nginx_config_fastcgi_cache() {
@@ -64,7 +64,7 @@ EOM
 # ---------------------------------------------------------------------------------------
 # nginx_config_fastcgi_custom_error_page() - Renders custom error page config for a location block
 #
-# @global NGINX_* The NGINX_ evnironment variables
+# @global NGINX_* The NGINX_ environment variables
 # @return void
 #
 nginx_config_fastcgi_custom_error_page() {
