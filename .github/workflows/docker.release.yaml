@@ -73,7 +73,7 @@ jobs:
           target_image_name: europe-docker.pkg.dev/flownative-cloud/docker/nginx
           target_registry_username: '_json_key'
           target_registry_password: ${{ secrets.GOOGLE_ARTIFACTS_PASSWORD_DOCKER }}
-          target_registry_endpoint: https://europe-docker.pkg.dev/v2/
+          target_registry_endpoint: https://europe-docker.pkg.dev
 
   release-dockerio:
     runs-on: ubuntu-latest
