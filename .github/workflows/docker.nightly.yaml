@@ -24,11 +24,11 @@ jobs:
           image_name: flownative/docker-nginx/nginx
           git_repository_url: https://github.com/${{ github.repository }}
           git_sha: ${{ github.sha }}
-          registry_password: ${{ secrets.GITHUB_BOT_TOKEN }}
+          registry_password: ${{ secrets.FLOWNATIVE_BOT_TOKEN }}
 
       - name: Dispatch
         uses: peter-evans/repository-dispatch@v1
         with:
-          token: ${{ secrets.GITHUB_BOT_TOKEN }}
+          token: ${{ secrets.FLOWNATIVE_BOT_TOKEN }}
           event-type: image-built
           client-payload: '{"image_name": "${{ steps.build_image.outputs.image_name }}", "image_tag": "${{ steps.build_image.outputs.image_tag }}"}'
