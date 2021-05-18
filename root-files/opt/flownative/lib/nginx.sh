@@ -57,6 +57,13 @@ nginx_config_fastcgi_cache() {
            fastcgi_cache_use_stale ${NGINX_CACHE_USE_STALE_OPTIONS};
            fastcgi_cache_background_update ${NGINX_CACHE_BACKGROUND_UPDATE};
 
+           if (\$http_cookie ~* "Neos_Session=([\w-]+)" ) {
+             set \$skipCache 1;
+           }
+
+           fastcgi_no_cache \$skipCache;
+           fastcgi_cache_bypass \$skipCache;
+
            add_header X-Nginx-Cache \$upstream_cache_status;
 EOM
 }
