@@ -35,6 +35,7 @@ types {
     application/rtf                       rtf;
     application/vnd.apple.mpegurl         m3u8;
     application/vnd.apple.pkpass          pkpass;
+    application/vnd.apple.pkpasses        pkpasses;
     application/vnd.ms-excel              xls;
     application/vnd.ms-fontobject         eot;
     application/vnd.ms-powerpoint         ppt;
