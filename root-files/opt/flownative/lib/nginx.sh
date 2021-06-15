@@ -59,6 +59,8 @@ nginx_config_fastcgi_cache() {
 
            if (\$http_cookie ~* "Neos_Session=([\w-]+)" ) {
              set \$skipCache 1;
+           } else {
+             set \$skipCache 0;
            }
 
            fastcgi_no_cache \$skipCache;
