@@ -86,6 +86,10 @@ server {
 
     client_max_body_size 500M;
 
+    if (\$http_user_agent ~* (citrixreceiver)) {
+        return 403;
+    }
+
     # allow .well-known/... in root
     location ~ ^/\\.well-known/.+ {
         allow all;
