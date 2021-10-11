@@ -29,6 +29,25 @@ jobs:
           ref: ${{ steps.latest_version.outputs.tag }}
           fetch-depth: 100
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          flavor: |
+            latest=true
+          images: |
+            flownative/nginx
+            europe-docker.pkg.dev/flownative/docker/nginx
+          labels: |
+            org.opencontainers.image.title=Beach Nginx
+            org.opencontainers.image.description=Docker image providing Nginx for Beach instances
+            org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.vendor=Flownative GmbH
+            org.opencontainers.image.version=${{ steps.latest_version.outputs.version }}
+          tags: |
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.latest_version.outputs.version }}
+            type=semver,pattern={{version}},value=${{ steps.latest_version.outputs.version }}
+
       - name: Set up QEMU
         id: qemu
         uses: docker/setup-qemu-action@v1
@@ -57,8 +76,5 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            flownative/nginx:${{ steps.latest_version.outputs.version }}
-            flownative/nginx:latest
-            europe-docker.pkg.dev/flownative/docker/nginx:${{ steps.latest_version.outputs.version }}
-            europe-docker.pkg.dev/flownative/docker/nginx:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

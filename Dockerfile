@@ -1,9 +1,5 @@
-FROM docker.pkg.github.com/flownative/docker-base/base:buster
+FROM europe-docker.pkg.dev/flownative/docker/base:buster
 MAINTAINER Robert Lemke <robert@flownative.com>
-
-LABEL org.label-schema.name="Beach Nginx"
-LABEL org.label-schema.description="Docker image providing Nginx for Beach instances"
-LABEL org.label-schema.vendor="Flownative GmbH"
 
 # -----------------------------------------------------------------------------
 # Nginx
