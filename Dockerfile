@@ -9,8 +9,7 @@ LABEL org.label-schema.vendor="Flownative GmbH"
 # Nginx
 # Latest versions: https://packages.debian.org/buster/nginx
 
-ARG NGINX_VERSION
-ENV NGINX_VERSION ${NGINX_VERSION}
+ENV NGINX_VERSION=1.14.2-2+deb10u4
 
 ENV FLOWNATIVE_LIB_PATH=/opt/flownative/lib \
     NGINX_BASE_PATH=/opt/flownative/nginx \

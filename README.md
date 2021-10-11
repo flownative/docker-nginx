@@ -90,18 +90,3 @@ users port 8080 instead. Since you can map that port to any other port
 by telling Docker or Kubernetes, this won't be a problem in practice.
 However, be aware that you need to specify 8080 as the container port –
 otherwise you won't get a connection.
-
-## Building this image
-
-Build this image with `docker build`. You need to specify the desired
-version for some tools as build arguments:
-
-```bash
-docker build \
-    --build-arg NGINX_VERSION=1.14.2-2+deb10u3 \
-    -t flownative/nginx:latest .
-```
-
-Check the latest stable release on the tool's respective websites:
-
-- Nginx: https://packages.debian.org/buster/nginx
