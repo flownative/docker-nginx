@@ -12,7 +12,6 @@ ENV FLOWNATIVE_LIB_PATH=/opt/flownative/lib \
     LOG_DEBUG=false
 
 USER root
-COPY --from=docker.pkg.github.com/flownative/bash-library/bash-library:1 /lib $FLOWNATIVE_LIB_PATH
 
 # Packages are needed for the following reasons:
 #
