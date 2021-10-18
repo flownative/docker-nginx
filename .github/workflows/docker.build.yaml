@@ -45,6 +45,7 @@ jobs:
             org.opencontainers.image.vendor=Flownative GmbH
             org.opencontainers.image.version=${{ steps.latest_version.outputs.version }}
           tags: |
+            type=semver,pattern={{major}},value=${{ steps.latest_version.outputs.version }}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.latest_version.outputs.version }}
             type=semver,pattern={{version}},value=${{ steps.latest_version.outputs.version }}
 
