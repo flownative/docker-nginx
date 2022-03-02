@@ -176,8 +176,9 @@ EOM
         cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     location ~* ^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]+)/ {
         resolver 8.8.8.8;
-        expires max;
+        expires 3600;
         proxy_set_header Authorization "";
+        add_header Via 'Beach Asset Proxy';
         proxy_pass http://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1\$is_args\$args;
     }
 EOM
@@ -185,7 +186,7 @@ EOM
         cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     location ~* ^/_Resources/Persistent/(.*)$ {
         access_log off;
-        expires max;
+        expires 3600;
         try_files \$uri @fallback;
     }
 
@@ -208,7 +209,7 @@ EOM
     # for all static resources
     location ~ ^/_Resources/Static/ {
         access_log off;
-        expires max;
+        expires 3600;
     }
 }
 EOM
