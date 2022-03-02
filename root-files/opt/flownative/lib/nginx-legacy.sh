@@ -174,6 +174,11 @@ EOM
 
     if [ -n "${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}" ]; then
         cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
+    # redirect "subdivided" persistent resource requests to remove the subdivision parts
+    # e.g. _Resources/Persistent/1/2/3/4/123456789… to _Resources/Persistent/123456789…
+    location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}(?:[0-9a-f]/){4}([0-9a-f]{40}/.*)" {
+        return 301 \$scheme://\$host${BEACH_PERSISTENT_RESOURCES_BASE_PATH}\$1;
+    }
     # pass persistent resource requests to GCS
     location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]{40})/" {
         resolver 8.8.8.8;
