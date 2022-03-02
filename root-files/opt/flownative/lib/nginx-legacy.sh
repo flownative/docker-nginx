@@ -174,7 +174,8 @@ EOM
 
     if [ -n "${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}" ]; then
         cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
-    location ~* ^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]+)/ {
+    # pass persistent resource requests to GCS
+    location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]{40})/" {
         resolver 8.8.8.8;
         expires 3600;
         proxy_set_header Authorization "";
