@@ -60,6 +60,7 @@ export NGINX_CUSTOM_ERROR_PAGE_TARGET=${NGINX_CUSTOM_ERROR_PAGE_TARGET:-${BEACH_
 
 export NGINX_STRICT_TRANSPORT_SECURITY_ENABLE=${NGINX_STRICT_TRANSPORT_SECURITY_ENABLE:-no}
 export NGINX_STRICT_TRANSPORT_SECURITY_PRELOAD=${NGINX_STRICT_TRANSPORT_SECURITY_PRELOAD:-no}
+export NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE:-31536000}
 
 export NGINX_AUTH_BASIC_REALM=${NGINX_AUTH_BASIC_REALM:-off}
 export NGINX_AUTH_BASIC_USERNAME=${NGINX_AUTH_BASIC_USERNAME:-}
@@ -128,12 +129,12 @@ EOM
         if is_boolean_yes "${NGINX_STRICT_TRANSPORT_SECURITY_PRELOAD}"; then
             info "Nginx: Enabling Strict Transport Security with preloading ..."
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
-            add_header Strict-Transport-Security "max-age=31536000; preload" always;
+            add_header Strict-Transport-Security "max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}; preload" always;
 EOM
         else
             info "Nginx: Enabling Strict Transport Security without preloading ..."
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
-            add_header Strict-Transport-Security "max-age=31536000" always;
+            add_header Strict-Transport-Security "max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}" always;
 EOM
         fi
     fi

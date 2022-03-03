@@ -61,6 +61,7 @@ for possible values. The default value is `warn`.
 | NGINX_STATIC_ROOT                        | string  | /var/www/html                         | Document root path for when BEACH_NGINX_MODE is "Static"                                            |
 | NGINX_STRICT_TRANSPORT_SECURITY_ENABLE   | boolean | no                                    | If Strict-Transport-Security headers should be sent (HSTS)                                          |
 | NGINX_STRICT_TRANSPORT_SECURITY_PRELOAD  | boolean | no                                    | If site should be added to list of HTTPS-only sites by Google and others                            |
+| NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE  | boolean | 31536000                              | Maxmimum age for Strict-Transport-Security header, if enabled                                       |
 | NGINX_AUTH_BASIC_REALM                   | string  | off                                   | Realm for HTTP Basic Authentication; if "off", authentication is disabled                           |
 | NGINX_AUTH_BASIC_USERNAME                | string  |                                       | Username for HTTP Basic Authentication                                                              |
 | NGINX_AUTH_BASIC_ENCODED_HASHED_PASSWORD | string  |                                       | Base64-encoded hashed password (using httpasswd) for HTTP Basic Authentication                      |
