@@ -1,11 +1,12 @@
-FROM europe-docker.pkg.dev/flownative/docker/base:buster
-MAINTAINER Robert Lemke <robert@flownative.com>
+FROM europe-docker.pkg.dev/flownative/docker/base:bullseye
+
+LABEL org.opencontainers.image.authors="Robert Lemke <robert@flownative.com>"
 
 # -----------------------------------------------------------------------------
 # Nginx
-# Latest versions: https://packages.debian.org/buster/nginx
+# Latest versions: https://packages.debian.org/bullseye/nginx
 
-ENV NGINX_VERSION=1.14.2-2+deb10u4
+ENV NGINX_VERSION=1.18.0-6.1
 
 ENV FLOWNATIVE_LIB_PATH=/opt/flownative/lib \
     NGINX_BASE_PATH=/opt/flownative/nginx \

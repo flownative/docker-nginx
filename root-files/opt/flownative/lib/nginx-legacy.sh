@@ -78,6 +78,18 @@ EOF
 #
 nginx_legacy_initialize_flow() {
     info "Nginx: Enabling Flow site configuration ..."
+
+    addHeaderStrictTransportSecurity=""
+    if is_boolean_yes "${NGINX_STRICT_TRANSPORT_SECURITY_ENABLE}"; then
+        if is_boolean_yes "${NGINX_STRICT_TRANSPORT_SECURITY_PRELOAD}"; then
+            info "Nginx: Enabling Strict Transport Security with preloading, max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE} ..."
+            addHeaderStrictTransportSecurity="add_header Strict-Transport-Security \"max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}; preload\" always;"
+        else
+            info "Nginx: Enabling Strict Transport Security without preloading, max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE} ..."
+            addHeaderStrictTransportSecurity="add_header Strict-Transport-Security \"max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}\" always;"
+        fi
+    fi
+
     cat >"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
 
 server {
@@ -94,6 +106,7 @@ server {
     # allow .well-known/... in root
     location ~ ^/\\.well-known/.+ {
         allow all;
+        add_header Via '\$hostname' always;
     }
 
     # deny files starting with a dot (having "/." in the path)
@@ -108,7 +121,6 @@ server {
         access_log off;
     }
 
-    add_header Via '\$hostname';
 EOM
 
     if [ "${NGINX_AUTH_BASIC_REALM}" != "off" ]; then
@@ -125,27 +137,14 @@ EOM
 EOM
     fi
 
-    if is_boolean_yes "${NGINX_STRICT_TRANSPORT_SECURITY_ENABLE}"; then
-        if is_boolean_yes "${NGINX_STRICT_TRANSPORT_SECURITY_PRELOAD}"; then
-            info "Nginx: Enabling Strict Transport Security with preloading, max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE} ..."
-    cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
-            add_header Strict-Transport-Security "max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}; preload" always;
-EOM
-        else
-            info "Nginx: Enabling Strict Transport Security without preloading, max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE} ..."
-    cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
-            add_header Strict-Transport-Security "max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}" always;
-EOM
-        fi
-    else
-            info "Nginx: Strict Transport Security header is disabled"
-    fi
-
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     location ~ \\.php\$ {
            include fastcgi_params;
 
            client_max_body_size 500M;
+
+           add_header Via '\$hostname' always;
+           ${addHeaderStrictTransportSecurity}
 
            fastcgi_pass ${BEACH_PHP_FPM_HOST}:${BEACH_PHP_FPM_PORT};
            fastcgi_index index.php;
@@ -188,6 +187,7 @@ EOM
         expires 3600;
         proxy_set_header Authorization "";
         add_header Via 'Beach Asset Proxy';
+        ${addHeaderStrictTransportSecurity}
         proxy_pass http://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1\$is_args\$args;
     }
 EOM
@@ -196,12 +196,15 @@ EOM
     location ~* ^/_Resources/Persistent/(.*)$ {
         access_log off;
         expires 3600;
+        add_header Via '\$hostname' always;
+        ${addHeaderStrictTransportSecurity}
         try_files \$uri @fallback;
     }
 
     location @fallback {
         set \$assetUri ${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}\$1;
         add_header Via 'Beach Asset Fallback';
+        ${addHeaderStrictTransportSecurity}
         resolver 8.8.8.8;
         proxy_pass \$assetUri;
     }
@@ -212,11 +215,13 @@ EOM
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     # everything is tried as file first, then passed on to index.php (i.e. Flow)
     location / {
+        add_header Via '\$hostname' always;
         try_files \$uri /index.php?\$args;
     }
 
     # for all static resources
     location ~ ^/_Resources/Static/ {
+        add_header Via '\$hostname' always;
         access_log off;
         expires 3600;
     }
