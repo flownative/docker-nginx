@@ -127,16 +127,18 @@ EOM
 
     if is_boolean_yes "${NGINX_STRICT_TRANSPORT_SECURITY_ENABLE}"; then
         if is_boolean_yes "${NGINX_STRICT_TRANSPORT_SECURITY_PRELOAD}"; then
-            info "Nginx: Enabling Strict Transport Security with preloading ..."
+            info "Nginx: Enabling Strict Transport Security with preloading, max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE} ..."
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
             add_header Strict-Transport-Security "max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}; preload" always;
 EOM
         else
-            info "Nginx: Enabling Strict Transport Security without preloading ..."
+            info "Nginx: Enabling Strict Transport Security without preloading, max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE} ..."
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
             add_header Strict-Transport-Security "max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}" always;
 EOM
         fi
+    else
+            info "Nginx: Strict Transport Security header is disabled"
     fi
 
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
