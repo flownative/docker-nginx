@@ -127,16 +127,18 @@ EOM
 
     if is_boolean_yes "${NGINX_STRICT_TRANSPORT_SECURITY_ENABLE}"; then
         if is_boolean_yes "${NGINX_STRICT_TRANSPORT_SECURITY_PRELOAD}"; then
-            info "Nginx: Enabling Strict Transport Security with preloading ..."
+            info "Nginx: Enabling Strict Transport Security with preloading, max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE} ..."
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
             add_header Strict-Transport-Security "max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}; preload" always;
 EOM
         else
-            info "Nginx: Enabling Strict Transport Security without preloading ..."
+            info "Nginx: Enabling Strict Transport Security without preloading, max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE} ..."
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
             add_header Strict-Transport-Security "max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}" always;
 EOM
         fi
+    else
+            info "Nginx: Strict Transport Security header is disabled"
     fi
 
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
@@ -175,7 +177,13 @@ EOM
 
     if [ -n "${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}" ]; then
         cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
-    location ~* ^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]+)/ {
+    # redirect "subdivided" persistent resource requests to remove the subdivision parts
+    # e.g. _Resources/Persistent/1/2/3/4/123456789… to _Resources/Persistent/123456789…
+    location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}(?:[0-9a-f]/){4}([0-9a-f]{40}/.*)" {
+        return 301 \$scheme://\$host${BEACH_PERSISTENT_RESOURCES_BASE_PATH}\$1;
+    }
+    # pass persistent resource requests to GCS
+    location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]{40})/" {
         resolver 8.8.8.8;
         expires 3600;
         proxy_set_header Authorization "";
