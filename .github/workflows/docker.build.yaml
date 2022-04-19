@@ -17,6 +17,9 @@ jobs:
           ref: 'main'
           fetch-depth: 100
 
+      - run: |
+          git config --global --add safe.directory /github/workspace
+
       - name: Determine latest version
         id: latest_version
         uses: flownative/action-git-latest-release@master
