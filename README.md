@@ -69,6 +69,7 @@ for possible values. The default value is `warn`.
 | BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH   | string  | /metrics                              | Path where metrics are located                                                                      |
 | BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT   | integer | 8082                                  | Port at which Nginx should listen to provide the metrics for scraping                               |
 | BEACH_NGINX_MODE                         | string  | Flow                                  | Either "Flow" or "Static"; this variable is going to be renamed in the future                       |
+| BEACH_STATIC_RESOURCES_LIFETIME          | string  | 30d                                   | Expiration time for static resources; examples: "3600s" or "7d" or "max"
 | FLOW_HTTP_TRUSTED_PROXIES                | string  | 10.0.0.0/8                            | Nginx passes FLOW_HTTP_TRUSTED_PROXIES to the virtual host using the value of this variable         |
 
 ## Security aspects

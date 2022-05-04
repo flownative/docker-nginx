@@ -116,9 +116,16 @@ server {
         log_not_found off;
     }
 
-    location = /favicon.ico {
+    location = /site.webmanifest {
         log_not_found off;
         access_log off;
+        expires ${NGINX_STATIC_FILES_LIFETIME};
+    }
+
+    location ~ ^/(android-chrome-.+|apple-touch-icon|favicon.*|mstile-.+|safari-pinned-tab).(png|svg|jpg|ico)$ {
+        log_not_found off;
+        access_log off;
+        expires ${NGINX_STATIC_FILES_LIFETIME};
     }
 
 EOM
@@ -184,7 +191,7 @@ EOM
     # pass persistent resource requests to GCS
     location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]{40})/" {
         resolver 8.8.8.8;
-        expires 3600;
+        expires ${NGINX_STATIC_FILES_LIFETIME};
         proxy_set_header Authorization "";
         add_header Via 'Beach Asset Proxy';
         ${addHeaderStrictTransportSecurity}
@@ -193,9 +200,9 @@ EOM
 EOM
     elif [ -n "${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}" ]; then
         cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
-    location ~* ^/_Resources/Persistent/(.*)$ {
+    location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}(.*)$ {
         access_log off;
-        expires 3600;
+        expires ${NGINX_STATIC_FILES_LIFETIME};
         add_header Via '\$hostname' always;
         ${addHeaderStrictTransportSecurity}
         try_files \$uri @fallback;
@@ -209,7 +216,16 @@ EOM
         proxy_pass \$assetUri;
     }
 EOM
-
+    else
+        cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
+    location ~* ^/_Resources/Persistent/(.*)$ {
+        access_log off;
+        expires ${NGINX_STATIC_FILES_LIFETIME};
+        add_header Via '\$hostname' always;
+        ${addHeaderStrictTransportSecurity}
+        try_files \$uri -404;
+    }
+EOM
     fi
 
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
@@ -221,9 +237,9 @@ EOM
 
     # for all static resources
     location ~ ^/_Resources/Static/ {
-        add_header Via '\$hostname' always;
+        add_header X-Static-Resource '\$hostname' always;
         access_log off;
-        expires 3600;
+        expires ${NGINX_STATIC_FILES_LIFETIME};
     }
 }
 EOM
