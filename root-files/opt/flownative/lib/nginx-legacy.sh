@@ -193,9 +193,9 @@ EOM
         resolver 8.8.8.8;
         proxy_set_header Authorization "";
         add_header Via 'Beach Asset Proxy';
-        add_header Cache-Control 'public, max-age=${NGINX_STATIC_FILES_LIFETIME}';
         ${addHeaderStrictTransportSecurity}
         proxy_pass http://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1\$is_args\$args;
+        add_header cache-control 'public, max-age=15552000';
     }
 EOM
     elif [ -n "${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}" ]; then
