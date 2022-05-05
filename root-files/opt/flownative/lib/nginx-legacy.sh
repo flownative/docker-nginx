@@ -155,7 +155,6 @@ EOM
 
            fastcgi_pass ${BEACH_PHP_FPM_HOST}:${BEACH_PHP_FPM_PORT};
            fastcgi_index index.php;
-
 EOM
     if [ -n "${NGINX_CUSTOM_ERROR_PAGE_TARGET}" ]; then
         info "Nginx: Enabling custom error page pointing to ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET} ..."
@@ -195,7 +194,10 @@ EOM
         add_header Via 'Beach Asset Proxy';
         ${addHeaderStrictTransportSecurity}
         proxy_pass http://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1\$is_args\$args;
-        add_header cache-control 'public, max-age=15552000';
+
+        # See: https://github.com/openresty/headers-more-nginx-module#more_set_headers
+        more_set_headers -s '200 203 206' "cache-control: max-age=15552000";
+        more_set_headers -s '200 203 206' 'x-test-cache-control: max-age=15552000';
     }
 EOM
     elif [ -n "${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}" ]; then
