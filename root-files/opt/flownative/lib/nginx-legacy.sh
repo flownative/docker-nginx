@@ -193,11 +193,11 @@ EOM
         proxy_set_header Authorization "";
         add_header Via 'Beach Asset Proxy';
         ${addHeaderStrictTransportSecurity}
-        proxy_pass http://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1\$is_args\$args;
+        proxy_pass https://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1\$is_args\$args;
 
         # See: https://github.com/openresty/headers-more-nginx-module#more_set_headers
-        more_set_headers -s '200 203 206' "cache-control: max-age=15552000";
-        more_set_headers -s '200 203 206' 'x-test-cache-control: max-age=15552000';
+        more_set_headers -s '200 203 206 304' "cache-control: max-age=15552000";
+        more_set_headers -s '200 203 206 304' 'x-test-cache-control: max-age=15552000';
     }
 EOM
     elif [ -n "${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}" ]; then
