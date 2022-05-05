@@ -196,8 +196,10 @@ EOM
         proxy_pass https://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1\$is_args\$args;
 
         # See: https://github.com/openresty/headers-more-nginx-module#more_set_headers
-        more_set_headers -s '200 203 206 304' "cache-control: max-age=15552000";
-        more_set_headers -s '200 203 206 304' 'x-test-cache-control: max-age=15552000';
+        # and https://nginx-extras.getpagespeed.com/modules/headers-more/#more_set_headers
+        more_set_headers -s '200 203 206 304' 'Cache-Control: max-age=15552000';
+        more_set_headers 'X-Test-Cache-Control: max-age=15552000';
+        more_clear_headers 'x-goog-storage-class';
     }
 EOM
     elif [ -n "${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}" ]; then
