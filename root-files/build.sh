@@ -11,11 +11,13 @@ mkdir -p \
     "${NGINX_BASE_PATH}/cache" \
     "${NGINX_BASE_PATH}/etc" \
     "${NGINX_BASE_PATH}/log" \
+    "${NGINX_BASE_PATH}/modules" \
     "${NGINX_BASE_PATH}/sbin" \
     "${NGINX_BASE_PATH}/tmp"
 
 mv /etc/nginx/* "${NGINX_BASE_PATH}/etc/"
 mv /usr/sbin/nginx "${NGINX_BASE_PATH}/sbin/"
+mv /usr/lib/nginx/modules/* "${NGINX_BASE_PATH}/modules/"
 
 chown -R nginx:nginx "${NGINX_BASE_PATH}"
 chmod -R g+rwX "${NGINX_BASE_PATH}"

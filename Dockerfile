@@ -24,6 +24,7 @@ USER root
 RUN install_packages \
     nginx-common=${NGINX_VERSION} \
     nginx-extras=${NGINX_VERSION} \
+    libnginx-mod-http-headers-more-filter \
     ca-certificates \
     procps \
     && rm /etc/nginx/sites-available/default \
