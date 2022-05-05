@@ -27,7 +27,6 @@ RUN install_packages \
     libnginx-mod-http-headers-more-filter \
     ca-certificates \
     procps \
-    netcat vim less curl locales locales-all \
     && rm /etc/nginx/sites-available/default \
     && rm /etc/nginx/sites-enabled/default
 
