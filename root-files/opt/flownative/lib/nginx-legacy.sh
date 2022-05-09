@@ -193,7 +193,7 @@ EOM
         proxy_set_header Authorization "";
         add_header Via 'Beach Asset Proxy';
         ${addHeaderStrictTransportSecurity}
-        proxy_pass https://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1\$is_args\$args;
+        proxy_pass https://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1\$is_args\$args?reqid=\$request_id;
         expires ${NGINX_STATIC_FILES_LIFETIME};
     }
 EOM
