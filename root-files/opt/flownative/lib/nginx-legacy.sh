@@ -199,7 +199,7 @@ EOM
 EOM
     elif [ -n "${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}" ]; then
         cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
-    location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}(.*)$ {
+    location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}(.*)$" {
         access_log off;
         expires ${NGINX_STATIC_FILES_LIFETIME};
         add_header Via '\$hostname' always;
