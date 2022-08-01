@@ -6,7 +6,7 @@ LABEL org.opencontainers.image.authors="Robert Lemke <robert@flownative.com>"
 # Nginx
 # Latest versions: https://packages.debian.org/bullseye/nginx
 
-ENV NGINX_VERSION=1.18.0-6.1
+ENV NGINX_VERSION=1.18.0-6.1+deb11u2
 
 ENV FLOWNATIVE_LIB_PATH=/opt/flownative/lib \
     NGINX_BASE_PATH=/opt/flownative/nginx \
