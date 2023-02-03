@@ -90,9 +90,14 @@ assets stored in a S3 bucket which is accessible at
 The environment variables to set for the above example are as follows:
 
 ```
-BEACH_PERSISTENT_RESOURCES_BASE_PATH=https://www.example.com/assets/
-BEACH_ASSET_PROXY_ENDPOINT=https://some.cloud.storage/some-bucket/
+BEACH_PERSISTENT_RESOURCES_BASE_PATH=/assets/
+BEACH_ASSET_PROXY_ENDPOINT=https://some.cloud.storage/some-bucket
 ```
+
+> Note: Make sure that both values are formatted exactly like in the given 
+> examples, for example don't forget the trailing "/" in 
+> `BEACH_PERSISTENT_RESOURCES_BASE_PATH` and don't add a trailing "/" in 
+> "BEACH_ASSET_PROXY_ENDPOINT". 
 
 ## Security aspects
 
