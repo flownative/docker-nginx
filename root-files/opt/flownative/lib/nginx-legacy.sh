@@ -47,6 +47,7 @@ fi
 export BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI=${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI:-}
 export BEACH_PERSISTENT_RESOURCES_BASE_PATH=${BEACH_PERSISTENT_RESOURCES_BASE_PATH:-/_Resources/Persistent/}
 export BEACH_ASSET_PROXY_ENDPOINT=${BEACH_ASSET_PROXY_ENDPOINT:-}
+export BEACH_ASSET_PROXY_RESOLVER=${BEACH_ASSET_PROXY_RESOLVER:-8.8.8.8}
 export BEACH_PHP_FPM_HOST=${BEACH_PHP_FPM_HOST:-localhost}
 export BEACH_PHP_FPM_PORT=${BEACH_PHP_FPM_PORT:-9000}
 export BEACH_NGINX_MODE=${BEACH_NGINX_MODE:-Flow}
@@ -190,7 +191,7 @@ EOM
     }
     # pass persistent resource requests to the custom endpoint (S3, Minio, GCS ...)
     location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]{40})/" {
-        resolver 8.8.8.8;
+        resolver ${BEACH_ASSET_PROXY_RESOLVER};
         proxy_set_header Authorization "";
         add_header Via 'Beach Asset Proxy';
         ${addHeaderStrictTransportSecurity}
@@ -207,7 +208,7 @@ EOM
     }
     # pass persistent resource requests to GCS
     location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]{40})/" {
-        resolver 8.8.8.8;
+        resolver ${BEACH_ASSET_PROXY_RESOLVER};
         proxy_set_header Authorization "";
         add_header Via 'Beach Asset Proxy';
         ${addHeaderStrictTransportSecurity}
@@ -229,7 +230,7 @@ EOM
         set \$assetUri ${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}\$1;
         add_header Via 'Beach Asset Fallback';
         ${addHeaderStrictTransportSecurity}
-        resolver 8.8.8.8;
+        resolver ${BEACH_ASSET_PROXY_RESOLVER};
         proxy_pass \$assetUri;
     }
 EOM
