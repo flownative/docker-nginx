@@ -76,7 +76,7 @@ for possible values. The default value is `warn`.
 
 ## Asset Proxy
 
-By default, the direct URL of an asset stored in the S3 bucket is used as 
+By default, the direct URL of an asset stored in the cloud storage is used as 
 part of the Flow or Neos frontend output. In order to make URLs more 
 user-friendly or hide the fact that assets are stored in a cloud storage, 
 Nginx can act as a reverse proxy and make assets available through a 
@@ -84,7 +84,7 @@ sub-path of the website's main domain.
 
 For example, if the website is reachable via "https://www.example.com", the 
 proxy can be configured to map the path "https://www.example.com/assets/" to 
-assets stored in a S3 bucket which is accessible at 
+assets stored in a cloud storage bucket which is accessible at 
 "https://some.cloud.storage/some-bucket/".
 
 The environment variables to set for the above example are as follows:
