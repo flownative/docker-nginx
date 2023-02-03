@@ -46,6 +46,7 @@ else
 fi
 export BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI=${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI:-}
 export BEACH_PERSISTENT_RESOURCES_BASE_PATH=${BEACH_PERSISTENT_RESOURCES_BASE_PATH:-/_Resources/Persistent/}
+export BEACH_ASSET_PROXY_ENDPOINT=${BEACH_ASSET_PROXY_ENDPOINT:-}
 export BEACH_PHP_FPM_HOST=${BEACH_PHP_FPM_HOST:-localhost}
 export BEACH_PHP_FPM_PORT=${BEACH_PHP_FPM_PORT:-9000}
 export BEACH_NGINX_MODE=${BEACH_NGINX_MODE:-Flow}
@@ -180,7 +181,24 @@ EOM
     }
 EOM
 
-    if [ -n "${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}" ]; then
+    if [ -n "${BEACH_ASSET_PROXY_ENDPOINT}" ]; then
+        cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
+    # redirect "subdivided" persistent resource requests to remove the subdivision parts
+    # e.g. _Resources/Persistent/1/2/3/4/123456789… to _Resources/Persistent/123456789…
+    location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}(?:[0-9a-f]/){4}([0-9a-f]{40}/.*)" {
+        return 301 \$scheme://\$host${BEACH_PERSISTENT_RESOURCES_BASE_PATH}\$1;
+    }
+    # pass persistent resource requests to the custom endpoint (S3, Minio, GCS ...)
+    location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]{40})/" {
+        resolver 8.8.8.8;
+        proxy_set_header Authorization "";
+        add_header Via 'Beach Asset Proxy';
+        ${addHeaderStrictTransportSecurity}
+        proxy_pass ${BEACH_ASSET_PROXY_ENDPOINT}/\$1\$is_args\$args?reqid=\$request_id;
+        expires ${NGINX_STATIC_FILES_LIFETIME};
+    }
+EOM
+    elif [ -n "${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}" ]; then
         cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     # redirect "subdivided" persistent resource requests to remove the subdivision parts
     # e.g. _Resources/Persistent/1/2/3/4/123456789… to _Resources/Persistent/123456789…
