@@ -6,7 +6,7 @@ on:
     branches-ignore:
       - '**'
     tags:
-      - 'v4.*.*'
+      - 'v*.*.*'
 
 jobs:
   build:
