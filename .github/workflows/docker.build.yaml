@@ -82,3 +82,12 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Send mail for Opsgenie heartbeat
+        uses: dawidd6/action-send-mail@v3
+        with:
+          connection_url: ${{secrets.OPSGENIE_HEARTBEAT_MAIL_CREDENTIALS}}
+          subject: Github Actions heartbeat ping
+          to: docker-build-nginx@flownative.heartbeat.eu.opsgenie.net
+          from: Github Actions <noreply@flownative.com>
+          body: Build job of ${{github.repository}} completed successfully!
