@@ -1,0 +1,11 @@
+name: Build Docker Image on tag
+on:
+  push:
+    branches-ignore:
+      - '**'
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build: 
+    uses: ./.github/workflows/docker.build.yaml
