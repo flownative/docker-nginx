@@ -7,5 +7,6 @@ on:
       - 'v*.*.*'
 
 jobs:
-  build: 
+  build:
     uses: ./.github/workflows/docker.build.yaml
+    secrets: inherit
