@@ -38,17 +38,35 @@ redirected to STDERR. That way, you can follow logs by watching
 container logs with `docker logs` or using a similar mechanism in
 Kubernetes or your actual platform.
 
+Additionally, logs are also stored in /opt/flownative/log/nginx-error.log
+and /opt/flownative/log/nginx-access.log. If the log format is "json",
+the access log file is /opt/flownative/log/nginx-access.json.log
+
 The log level for error can be defined via the `NGINX_LOG_LEVEL`
 environment variable. See the
 [Nginx documentation](https://docs.nginx.com/nginx/admin-guide/monitoring/logging/)
 for possible values. The default value is `warn`.
+
+The access log is disabled by default, it can be enabled by setting 
+`NGINX_ACCESS_LOG_ENABLE` to "true". 
+
+The access log's default format is similar to the standard Nginx
+"combined" format with a few additions, so that the IP address of
+the original request is shown since this Nginx is usually operated
+behind a reverse proxy.
+
+Instead of the default format, a JSON format can be used by setting
+`NGINX_ACCESS_LOG_FORMAT` to "json".
 
 ### Environment variables
 
 | Variable Name                            | Type    | Default                               | Description                                                                                                                                                                                                       |
 |:-----------------------------------------|:--------|:--------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | NGINX_BASE_PATH                          | string  | /opt/flownative/nginx                 | Base path for Nginx                                                                                                                                                                                               |
-| NGINX_LOG_LEVEL                          | string  | warn                                  | Nginx log level (see [documentation](https://docs.nginx.com/nginx/admin-guide/monitoring/logging/))                                                                                                               |
+| NGINX_ERROR_LOG_LEVEL                    | string  | warn                                  | Nginx log level (see [documentation](https://docs.nginx.com/nginx/admin-guide/monitoring/logging/))                                                                                                               |
+| NGINX_ACCESS_LOG_ENABLE                  | boolean | no                                    | Nginx log level (see [documentation](https://docs.nginx.com/nginx/admin-guide/monitoring/logging/))                                                                                                               |
+| NGINX_ACCESS_LOG_FORMAT                  | string  | default                               | Format of the access log; possible values are "default" and "json"                                                                                                                                                |
+| NGINX_ACCESS_LOG_MODE                    | string  | dynamic                               | Defines which requests should be logged: "dynamic" only logs dynamic requests to PHP, "all" also includes requests to static files                                                                                |
 | NGINX_CACHE_ENABLE                       | boolean | no                                    | If the FastCGI cache should be enabled; see section about caching                                                                                                                                                 |
 | NGINX_CACHE_NAME                         | string  | application                           | Name of the memory zone Nginx should use for caching                                                                                                                                                              |
 | NGINX_CACHE_DEFAULT_LIFETIME             | string  | 5s                                    | Default cache lifetime to use when caching is enabled                                                                                                                                                             |
