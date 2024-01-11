@@ -2,7 +2,7 @@ daemon off;
 worker_processes  auto;
 
 pid ${NGINX_TMP_PATH}/nginx.pid;
-error_log ${FLOWNATIVE_LOG_PATH}/nginx_error.log ${NGINX_LOG_LEVEL};
+error_log ${FLOWNATIVE_LOG_PATH}/nginx-error.log ${NGINX_ERROR_LOG_LEVEL};
 
 load_module ${NGINX_BASE_PATH}/modules/ngx_http_headers_more_filter_module.so;
 
@@ -27,14 +27,14 @@ http {
     tcp_nopush on;
     tcp_nodelay on;
 
-    log_format  main_ext  '$remote_addr - $remote_user [$time_local] "$request" '
-                         '$status $body_bytes_sent "$http_referer" '
-                         '"$http_user_agent" "$http_x_forwarded_for" '
-                         '"$host" sn="$server_name" '
-                         'rt=$request_time '
-                         'ua="$upstream_addr" us="$upstream_status" '
-                         'ut="$upstream_response_time" ul="$upstream_response_length" '
-                         'cs=$upstream_cache_status' ;
+    log_format  main_ext  '$$remote_addr - $$remote_user [$$time_local] "$$request" '
+                         '$$status $$body_bytes_sent "$$http_referer" '
+                         '"$$http_user_agent" "$$http_x_forwarded_for" '
+                         '"$$host" sn="$$server_name" '
+                         'rt=$$request_time '
+                         'ua="$$upstream_addr" us="$$upstream_status" '
+                         'ut="$$upstream_response_time" ul="$$upstream_response_length" '
+                         'cs=$$upstream_cache_status' ;
 
     log_format main_json escape=json '{'
       '"msec": "$$msec", '                                               # request unixtime in seconds with a milliseconds resolution
@@ -64,9 +64,6 @@ http {
       '"request_method": "$$request_method", '                           # request method
       '"server_protocol": "$$server_protocol"'                         # request protocol, like HTTP/1.1 or HTTP/2.0
     '}';
-
-#    access_log ${FLOWNATIVE_LOG_PATH}/nginx_access.log main_ext buffer=256k flush=5m;
-#    access_log ${FLOWNATIVE_LOG_PATH}/nginx_access.log.json main_json buffer=256k flush=5m;
 
     client_body_buffer_size 5M;
     client_max_body_size 500M;

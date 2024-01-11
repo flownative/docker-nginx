@@ -18,7 +18,7 @@
 # ---------------------------------------------------------------------------------------
 # nginx_legacy_env() - Load global environment variables for configuring Nginx
 #
-# @global NGINX_* The NGINX_ evnironment variables
+# @global NGINX_* The NGINX_ environment variables
 # @return "export" statements which can be passed to eval()
 #
 nginx_legacy_env() {
@@ -146,7 +146,30 @@ EOM
 EOM
     fi
 
+    dynamicAccessLogDirective=""
+    staticAccessLogDirective=""
+
+    if is_boolean_yes "${NGINX_ACCESS_LOG_ENABLE}"; then
+        if [ "${NGINX_ACCESS_LOG_FORMAT}" == "json" ]; then
+            info "Nginx: Enabling access log using format 'json' ..."
+            dynamicAccessLogDirective="    access_log ${FLOWNATIVE_LOG_PATH}/nginx-access.json.log main_json buffer=256k flush=5s;"
+        else
+            info "Nginx: Enabling access log using format 'default' ..."
+            dynamicAccessLogDirective="    access_log ${FLOWNATIVE_LOG_PATH}/nginx-access.log main_ext buffer=256k flush=5s;"
+        fi
+    else
+        info "Nginx: Access log is disabled"
+    fi
+
+    if [ "${NGINX_ACCESS_LOG_MODE}" == "all" ]; then
+            info "Nginx: Enabling access log for all types of requests ..."
+        staticAccessLogDirective=${dynamicAccessLogDirective}
+    fi
+
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
+
+    $staticAccessLogDirective
+
     location ~ \\.php\$ {
            include fastcgi_params;
 
@@ -157,7 +180,10 @@ EOM
 
            fastcgi_pass ${BEACH_PHP_FPM_HOST}:${BEACH_PHP_FPM_PORT};
            fastcgi_index index.php;
+
+           $dynamicAccessLogDirective
 EOM
+
     if [ -n "${NGINX_CUSTOM_ERROR_PAGE_TARGET}" ]; then
         info "Nginx: Enabling custom error page pointing to ${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET} ..."
         nginx_config_fastcgi_custom_error_page >>"${NGINX_CONF_PATH}/sites-enabled/site.conf"
@@ -219,7 +245,7 @@ EOM
     elif [ -n "${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}" ]; then
         cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}(.*)$" {
-        access_log off;
+        ${staticAccessLogDirective}
         expires ${NGINX_STATIC_FILES_LIFETIME};
         add_header Via '\$hostname' always;
         ${addHeaderStrictTransportSecurity}
@@ -237,7 +263,7 @@ EOM
     else
         cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     location ~* ^/_Resources/Persistent/(.*)$ {
-        access_log off;
+        ${staticAccessLogDirective}
         expires ${NGINX_STATIC_FILES_LIFETIME};
         add_header Via '\$hostname' always;
         ${addHeaderStrictTransportSecurity}
@@ -256,7 +282,7 @@ EOM
     # for all static resources
     location ~ ^/_Resources/Static/ {
         add_header X-Static-Resource '\$hostname' always;
-        access_log off;
+        ${staticAccessLogDirective}
         expires ${NGINX_STATIC_FILES_LIFETIME};
     }
 }

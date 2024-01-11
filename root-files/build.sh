@@ -10,7 +10,6 @@ groupadd --gid 1000 nginx
 mkdir -p \
     "${NGINX_BASE_PATH}/cache" \
     "${NGINX_BASE_PATH}/etc" \
-    "${NGINX_BASE_PATH}/log" \
     "${NGINX_BASE_PATH}/modules" \
     "${NGINX_BASE_PATH}/sbin" \
     "${NGINX_BASE_PATH}/tmp"
@@ -27,7 +26,6 @@ chmod -R g+rwX "${NGINX_BASE_PATH}"
 
 chown -R nginx:nginx \
     "${NGINX_BASE_PATH}/cache" \
-    "${NGINX_BASE_PATH}/log" \
     "${NGINX_BASE_PATH}/tmp"
 
 # Fix ownership of syslog-ng's etc directory because COPY in this Dockerfile
