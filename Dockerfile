@@ -1,12 +1,12 @@
-FROM europe-docker.pkg.dev/flownative/docker/base:bullseye
+FROM europe-docker.pkg.dev/flownative/docker/base:bookworm
 
 LABEL org.opencontainers.image.authors="Robert Lemke <robert@flownative.com>"
 
 # -----------------------------------------------------------------------------
 # Nginx
-# Latest versions: https://packages.debian.org/bullseye/nginx
+# Latest versions: https://packages.debian.org/bookworm/nginx
 
-ENV NGINX_VERSION=1.18.0-6.1+deb11u3
+ENV NGINX_VERSION=1.22.1-9
 
 ENV FLOWNATIVE_LIB_PATH=/opt/flownative/lib \
     NGINX_BASE_PATH=/opt/flownative/nginx \
