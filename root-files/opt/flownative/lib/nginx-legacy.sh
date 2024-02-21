@@ -68,6 +68,8 @@ export NGINX_AUTH_BASIC_REALM=${NGINX_AUTH_BASIC_REALM:-off}
 export NGINX_AUTH_BASIC_USERNAME=${NGINX_AUTH_BASIC_USERNAME:-}
 export NGINX_AUTH_BASIC_ENCODED_HASHED_PASSWORD=${NGINX_AUTH_BASIC_ENCODED_HASHED_PASSWORD:-}
 
+export NGINX_ENABLE_UNDERSCORES_IN_HEADERS=${NGINX_ENABLE_UNDERSCORES_IN_HEADERS:-no}
+
 export NGINX_STATIC_ROOT=${NGINX_STATIC_ROOT:-/var/www/html}
 EOF
 }
@@ -90,6 +92,13 @@ nginx_legacy_initialize_flow() {
             info "Nginx: Enabling Strict Transport Security without preloading, max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE} ..."
             addHeaderStrictTransportSecurity="add_header Strict-Transport-Security \"max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}\" always;"
         fi
+    fi
+
+    if is_boolean_yes "${NGINX_ENABLE_UNDERSCORES_IN_HEADERS}"; then
+        info "Nginx: Enabling underscores in headers ..."
+        underScoresInHeadersDirective="underscores_in_headers on;"
+    else
+        underScoresInHeadersDirective="underscores_in_headers off;"
     fi
 
     cat >"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
@@ -308,6 +317,8 @@ server {
         access_log off;
         log_not_found off;
     }
+
+    ${underScoresInHeadersDirective}
 }
 EOM
 }
