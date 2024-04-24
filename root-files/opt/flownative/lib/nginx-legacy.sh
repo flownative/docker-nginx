@@ -58,6 +58,7 @@ export BEACH_NGINX_CUSTOM_METRICS_ENABLE=${BEACH_NGINX_CUSTOM_METRICS_ENABLE:-fa
 export BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH=${BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH:-/metrics}
 export BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT=${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT:-8082}
 
+export BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET="${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET:-}"
 export NGINX_CUSTOM_ERROR_PAGE_TARGET=${NGINX_CUSTOM_ERROR_PAGE_TARGET:-${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET:-}}
 
 export NGINX_STRICT_TRANSPORT_SECURITY_ENABLE=${NGINX_STRICT_TRANSPORT_SECURITY_ENABLE:-no}
@@ -161,10 +162,10 @@ EOM
     if is_boolean_yes "${NGINX_ACCESS_LOG_ENABLE}"; then
         if [ "${NGINX_ACCESS_LOG_FORMAT}" == "json" ]; then
             info "Nginx: Enabling access log using format 'json' ..."
-            dynamicAccessLogDirective="    access_log ${FLOWNATIVE_LOG_PATH}/nginx-access.json.log main_json buffer=256k flush=5s;"
+            dynamicAccessLogDirective="    access_log ${FLOWNATIVE_LOG_PATH}/nginx-access.json.log main_json buffer=256k flush=5s if=\$status_is_enabled_for_access_log;"
         else
             info "Nginx: Enabling access log using format 'default' ..."
-            dynamicAccessLogDirective="    access_log ${FLOWNATIVE_LOG_PATH}/nginx-access.log main_ext buffer=256k flush=5s;"
+            dynamicAccessLogDirective="    access_log ${FLOWNATIVE_LOG_PATH}/nginx-access.log main_ext buffer=256k flush=5s if=\$status_is_enabled_for_access_log;"
         fi
     else
         info "Nginx: Access log is disabled"
