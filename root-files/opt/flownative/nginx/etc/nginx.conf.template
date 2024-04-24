@@ -28,7 +28,7 @@ http {
     tcp_nodelay on;
 
     map $$status $$status_is_enabled_for_access_log {
-        ~${NGINX_ACCESS_LOG_IGNORED_STATUS_CODES_REGEX}  0;
+        ~${NGINX_ACCESS_LOG_IGNORED_STATUS_CODES_REGEX} 0;
         default 1;
     }
 
