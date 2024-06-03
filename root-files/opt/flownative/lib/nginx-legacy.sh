@@ -227,7 +227,7 @@ EOM
     }
     # pass persistent resource requests to the custom endpoint (S3, Minio, GCS ...)
     location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]{40})/" {
-        resolver ${BEACH_ASSET_PROXY_RESOLVER};
+        resolver ${BEACH_ASSET_PROXY_RESOLVER} ipv6=off;
         proxy_set_header Authorization "";
         add_header Via 'Beach Asset Proxy';
         ${addHeaderStrictTransportSecurity}
@@ -244,7 +244,7 @@ EOM
     }
     # pass persistent resource requests to GCS
     location ~* "^${BEACH_PERSISTENT_RESOURCES_BASE_PATH}([a-f0-9]{40})/" {
-        resolver ${BEACH_ASSET_PROXY_RESOLVER};
+        resolver ${BEACH_ASSET_PROXY_RESOLVER} ipv6=off;
         proxy_set_header Authorization "";
         add_header Via 'Beach Asset Proxy';
         ${addHeaderStrictTransportSecurity}
@@ -266,7 +266,7 @@ EOM
         set \$assetUri ${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}\$1;
         add_header Via 'Beach Asset Fallback';
         ${addHeaderStrictTransportSecurity}
-        resolver ${BEACH_ASSET_PROXY_RESOLVER};
+        resolver ${BEACH_ASSET_PROXY_RESOLVER} ipv6=off;
         proxy_pass \$assetUri;
     }
 EOM
