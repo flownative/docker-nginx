@@ -26,11 +26,12 @@ nginx_legacy_env() {
 export BEACH_APPLICATION_PATH=${BEACH_APPLICATION_PATH:-/application}
 export BEACH_APPLICATION_PATH=${BEACH_APPLICATION_PATH%/}
 export BEACH_FLOW_BASE_CONTEXT=${BEACH_FLOW_BASE_CONTEXT:-Production}
-export BEACH_FLOW_SUB_CONTEXT=${BEACH_FLOW_SUB_CONTEXT:-}
-if [ -z "${BEACH_FLOW_SUB_CONTEXT}" ]; then
-    export BEACH_FLOW_CONTEXT=${BEACH_FLOW_BASE_CONTEXT}/Beach/Instance
+export BEACH_FLOW_SUB_CONTEXT=${BEACH_FLOW_SUB_CONTEXT:-Instance}
+export BEACH_FLOW_CONTEXT=${BEACH_FLOW_BASE_CONTEXT}/Beach/${BEACH_FLOW_SUB_CONTEXT}
+if [[ -v FLOW_CONTEXT ]]; then
+    export FLOW_CONTEXT
 else
-    export BEACH_FLOW_CONTEXT=${BEACH_FLOW_BASE_CONTEXT}/Beach/${BEACH_FLOW_SUB_CONTEXT}
+    export FLOW_CONTEXT=${BEACH_FLOW_CONTEXT}
 fi
 
 export FLOW_HTTP_TRUSTED_PROXIES=${FLOW_HTTP_TRUSTED_PROXIES:-}
@@ -199,7 +200,7 @@ EOM
         nginx_config_fastcgi_custom_error_page >>"${NGINX_CONF_PATH}/sites-enabled/site.conf"
     fi
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
-           fastcgi_param FLOW_CONTEXT ${BEACH_FLOW_CONTEXT};
+           fastcgi_param FLOW_CONTEXT ${FLOW_CONTEXT};
            fastcgi_param FLOW_REWRITEURLS 1;
            fastcgi_param FLOW_ROOTPATH ${BEACH_APPLICATION_PATH};
            fastcgi_param FLOW_HTTP_TRUSTED_PROXIES ${FLOW_HTTP_TRUSTED_PROXIES};
@@ -375,7 +376,7 @@ server {
         fastcgi_pass ${BEACH_PHP_FPM_HOST}:${BEACH_PHP_FPM_PORT};
         fastcgi_index index.php;
 
-        fastcgi_param FLOW_CONTEXT ${BEACH_FLOW_CONTEXT};
+        fastcgi_param FLOW_CONTEXT ${FLOW_CONTEXT};
         fastcgi_param FLOW_REWRITEURLS 1;
         fastcgi_param FLOW_ROOTPATH ${BEACH_APPLICATION_PATH};
         fastcgi_param FLOW_HTTP_TRUSTED_PROXIES ${FLOW_HTTP_TRUSTED_PROXIES};
