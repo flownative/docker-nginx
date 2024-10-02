@@ -1,8 +1,7 @@
 [![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 [![Maintenance level: Love](https://img.shields.io/badge/maintenance-%E2%99%A1%E2%99%A1%E2%99%A1-ff69b4.svg)](https://www.flownative.com/en/products/open-source.html)
-![Nightly Builds](https://github.com/flownative/docker-nginx/workflows/Nightly%20Builds/badge.svg)
-![Release to Docker Registries](https://github.com/flownative/docker-nginx/workflows/Release%20to%20Docker%20Registries/badge.svg)
-
+![Build Docker Image daily](https://github.com/flownative/docker-nginx/actions/workflows/docker.build.yaml/badge.svg)
+![Build Docker Image on tag](https://github.com/flownative/docker-nginx/actions/workflows/docker.build.onpush.yaml/badge.svg)
 # Flownative Nginx Image
 
 A Docker image providing [Nginx](https://nginx.org) for [Beach](https://www.flownative.com/beach),
