@@ -59,6 +59,8 @@ export BEACH_NGINX_CUSTOM_METRICS_ENABLE=${BEACH_NGINX_CUSTOM_METRICS_ENABLE:-fa
 export BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH=${BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH:-/metrics}
 export BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT=${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT:-8082}
 
+export NGINX_CUSTOM_LOCATION_BLOCK_BASE64="${NGINX_CUSTOM_LOCATION_BLOCK_BASE64:-}"
+
 export BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET="${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET:-}"
 export NGINX_CUSTOM_ERROR_PAGE_TARGET=${NGINX_CUSTOM_ERROR_PAGE_TARGET:-${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET:-}}
 
@@ -115,7 +117,14 @@ server {
     if (\$http_user_agent ~* (citrixreceiver)) {
         return 403;
     }
+EOM
 
+    if [ -n "${NGINX_CUSTOM_LOCATION_BLOCK_BASE64}" ]; then
+        info "Nginx: Enabling custom location block ..."
+        base64 -d <<<"${NGINX_CUSTOM_LOCATION_BLOCK_BASE64}" >>"${NGINX_CONF_PATH}/sites-enabled/site.conf"
+    fi
+
+    cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     # allow .well-known/... in root
     location ~ ^/\\.well-known/.+ {
         allow all;
