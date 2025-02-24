@@ -60,6 +60,7 @@ nginx_config_fastcgi_cache() {
            fastcgi_cache_methods GET HEAD;
            fastcgi_cache_key \$request_method\$scheme\$host\$request_uri;
            fastcgi_cache_valid 200 301 302 ${NGINX_CACHE_DEFAULT_LIFETIME};
+           fastcgi_cache_valid 404 410 30s;
            fastcgi_cache_use_stale ${NGINX_CACHE_USE_STALE_OPTIONS};
            fastcgi_cache_background_update ${NGINX_CACHE_BACKGROUND_UPDATE};
 
