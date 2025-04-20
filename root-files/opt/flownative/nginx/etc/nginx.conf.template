@@ -19,6 +19,7 @@ http {
     scgi_temp_path "${NGINX_TMP_PATH}/scgi" 1 2;
     uwsgi_temp_path "${NGINX_TMP_PATH}/uwsgi" 1 2;
     fastcgi_cache_path "${NGINX_CACHE_PATH}" levels=1:2 keys_zone=application:10m max_size=${NGINX_CACHE_MAX_SIZE};
+    proxy_cache_path "${NGINX_CACHE_RESOURCES_PATH}" levels=1:2 keys_zone=persistent_res:2m max_size=2g inactive=336h use_temp_path=off;
 
     include ${NGINX_CONF_PATH}/mime.types;
     default_type application/octet-stream;

@@ -8,7 +8,8 @@ useradd --home-dir "${NGINX_BASE_PATH}" --no-create-home --no-user-group --uid 1
 groupadd --gid 1000 nginx
 
 mkdir -p \
-    "${NGINX_BASE_PATH}/cache" \
+    "${NGINX_BASE_PATH}/cache/application" \
+    "${NGINX_BASE_PATH}/cache/resources" \
     "${NGINX_BASE_PATH}/etc" \
     "${NGINX_BASE_PATH}/modules" \
     "${NGINX_BASE_PATH}/sbin" \
