@@ -243,6 +243,10 @@ EOM
         ${addHeaderStrictTransportSecurity}
         proxy_pass ${BEACH_ASSET_PROXY_ENDPOINT}/\$1\$is_args\$args?reqid=\$request_id;
         expires ${NGINX_STATIC_FILES_LIFETIME};
+        proxy_cache persistent_res;
+        # we care only about the resource hash as it's the only thing passed on, host is irrelevant
+        proxy_cache_key \$1;
+        add_header X-Nginx-Cache-Resources \$upstream_cache_status;
     }
 EOM
     elif [ -n "${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}" ]; then
@@ -260,6 +264,10 @@ EOM
         ${addHeaderStrictTransportSecurity}
         proxy_pass https://storage.googleapis.com/${BEACH_GOOGLE_CLOUD_STORAGE_PUBLIC_BUCKET}/\$1\$is_args\$args?reqid=\$request_id;
         expires ${NGINX_STATIC_FILES_LIFETIME};
+        proxy_cache persistent_res;
+        # we care only about the resource hash as it's the only thing passed on, host is irrelevant
+        proxy_cache_key \$1;
+        add_header X-Nginx-Cache-Resources \$upstream_cache_status;
     }
 EOM
     elif [ -n "${BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI}" ]; then
