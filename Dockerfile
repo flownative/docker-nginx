@@ -35,6 +35,10 @@ RUN /build.sh
 
 EXPOSE 8080
 
+# terminate with SIGQUIT which is handled gracefully by nginx
+# contrary to SIGTERM which terminates nginx immediately.
+STOPSIGNAL SIGQUIT
+
 USER nginx
 ENTRYPOINT ["/entrypoint.sh"]
 CMD [ "run" ]
