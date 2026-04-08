@@ -1,5 +1,5 @@
 daemon off;
-worker_processes  auto;
+worker_processes  ${NGINX_WORKER_PROCESSES};
 
 pid ${NGINX_TMP_PATH}/nginx.pid;
 error_log ${FLOWNATIVE_LOG_PATH}/nginx-error.log ${NGINX_ERROR_LOG_LEVEL};
