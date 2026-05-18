@@ -37,6 +37,7 @@ jobs:
           images: |
             flownative/nginx
             europe-docker.pkg.dev/flownative/docker/nginx
+            harbor.flownative.io/beach/nginx
           labels: |
             org.opencontainers.image.title=Beach Nginx
             org.opencontainers.image.description=Docker image providing Nginx for Beach instances
@@ -69,6 +70,13 @@ jobs:
           registry: europe-docker.pkg.dev/flownative/docker
           username: '_json_key'
           password: ${{ secrets.GOOGLE_ARTIFACTS_PASSWORD_DOCKER }}
+
+      - name: Login to Harbor
+        uses: docker/login-action@v4
+        with:
+          registry: harbor.flownative.io
+          username: ${{ secrets.HARBOR_BEACH_USERNAME }}
+          password: ${{ secrets.HARBOR_BEACH_PASSWORD }}
 
       - name: Build Docker image
         uses: docker/build-push-action@v7
