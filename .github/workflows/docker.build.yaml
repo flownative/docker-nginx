@@ -36,7 +36,6 @@ jobs:
             latest=true
           images: |
             flownative/nginx
-            europe-docker.pkg.dev/flownative/docker/nginx
             harbor.flownative.io/docker/nginx
           labels: |
             org.opencontainers.image.title=Beach Nginx
@@ -63,13 +62,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_IO_REGISTRY_USER }}
           password: ${{ secrets.DOCKER_IO_REGISTRY_PASSWORD }}
-
-      - name: Login to Google Artifacts Registry
-        uses: docker/login-action@v4
-        with:
-          registry: europe-docker.pkg.dev/flownative/docker
-          username: '_json_key'
-          password: ${{ secrets.GOOGLE_ARTIFACTS_PASSWORD_DOCKER }}
 
       - name: Login to Harbor
         uses: docker/login-action@v4
