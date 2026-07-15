@@ -10,7 +10,6 @@
 . "${FLOWNATIVE_LIB_PATH}/log.sh"
 . "${FLOWNATIVE_LIB_PATH}/files.sh"
 . "${FLOWNATIVE_LIB_PATH}/validation.sh"
-. "${FLOWNATIVE_LIB_PATH}/process.sh"
 
 # ---------------------------------------------------------------------------------------
 # nginx_env() - Load global environment variables for configuring Nginx
@@ -114,8 +113,4 @@ nginx_initialize() {
 
     envsubst < "${NGINX_CONF_PATH}/nginx.conf.template" > "${NGINX_CONF_PATH}/nginx.conf"
     file_move_if_exists "${NGINX_CONF_PATH}/mime.types.template" "${NGINX_CONF_PATH}/mime.types"
-
-    # Create a file descriptor for the Nginx stdout output and clean up the log
-    # lines a bit:
-    exec 4> >(sed -e "s/^\([0-9\/-]* [0-9:,]*\)/\1     OUTPUT Nginx:/")
 }

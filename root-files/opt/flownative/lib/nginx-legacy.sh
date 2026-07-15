@@ -98,13 +98,6 @@ nginx_legacy_initialize_flow() {
         fi
     fi
 
-    if is_boolean_yes "${NGINX_ENABLE_UNDERSCORES_IN_HEADERS}"; then
-        info "Nginx: Enabling underscores in headers ..."
-        underScoresInHeadersDirective="underscores_in_headers on;"
-    else
-        underScoresInHeadersDirective="underscores_in_headers off;"
-    fi
-
     cat >"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
 
 server {
@@ -172,10 +165,10 @@ EOM
     if is_boolean_yes "${NGINX_ACCESS_LOG_ENABLE}"; then
         if [ "${NGINX_ACCESS_LOG_FORMAT}" == "json" ]; then
             info "Nginx: Enabling access log using format 'json' ..."
-            dynamicAccessLogDirective="    access_log ${FLOWNATIVE_LOG_PATH}/nginx-access.json.log main_json buffer=256k flush=5s if=\$status_is_enabled_for_access_log;"
+            dynamicAccessLogDirective="    access_log /dev/stdout main_json buffer=256k flush=5s if=\$status_is_enabled_for_access_log;"
         else
             info "Nginx: Enabling access log using format 'default' ..."
-            dynamicAccessLogDirective="    access_log ${FLOWNATIVE_LOG_PATH}/nginx-access.log main_ext buffer=256k flush=5s if=\$status_is_enabled_for_access_log;"
+            dynamicAccessLogDirective="    access_log /dev/stdout main_ext buffer=256k flush=5s if=\$status_is_enabled_for_access_log;"
         fi
     else
         info "Nginx: Access log is disabled"
@@ -420,6 +413,15 @@ nginx_legacy_initialize() {
     info "Nginx: Setting up site configuration ..."
 
     info "Nginx: Mode is ${BEACH_NGINX_MODE}"
+
+    # Consumed by nginx_legacy_initialize_static(), therefore it must be set
+    # regardless of the mode:
+    if is_boolean_yes "${NGINX_ENABLE_UNDERSCORES_IN_HEADERS}"; then
+        info "Nginx: Enabling underscores in headers ..."
+        underScoresInHeadersDirective="underscores_in_headers on;"
+    else
+        underScoresInHeadersDirective="underscores_in_headers off;"
+    fi
 
     if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
         nginx_legacy_initialize_flow

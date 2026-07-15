@@ -5,36 +5,24 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-. "${FLOWNATIVE_LIB_PATH}/syslog-ng.sh"
-. "${FLOWNATIVE_LIB_PATH}/supervisor.sh"
+. "${FLOWNATIVE_LIB_PATH}/log.sh"
 . "${FLOWNATIVE_LIB_PATH}/banner.sh"
 . "${FLOWNATIVE_LIB_PATH}/nginx.sh"
 . "${FLOWNATIVE_LIB_PATH}/nginx-legacy.sh"
 
 banner_flownative NGINX
 
-eval "$(syslog_env)"
-syslog_initialize
-syslog_start
-
 eval "$(nginx_env)"
 eval "$(nginx_legacy_env)"
-eval "$(supervisor_env)"
 
 nginx_initialize
 nginx_legacy_initialize
 
-supervisor_initialize
-supervisor_start
-
-trap 'supervisor_stop; syslog_stop' SIGINT SIGTERM
-
 if [[ "$*" = *"run"* ]]; then
-    supervisor_pid=$(supervisor_get_pid)
     info "Entrypoint: Start up complete"
-    # We can't use "wait" because supervisord is not a direct child of this shell:
-    while [ -e "/proc/${supervisor_pid}" ]; do sleep 1.1; done
-    info "Good bye 👋"
+    # Nginx replaces this shell and becomes PID 1, so it receives SIGQUIT
+    # (the STOPSIGNAL of this image) directly and shuts down gracefully.
+    exec "${NGINX_BASE_PATH}/sbin/nginx" -c "${NGINX_CONF_PATH}/nginx.conf" -p "${NGINX_CONF_PATH}"
 else
     "$@"
 fi
