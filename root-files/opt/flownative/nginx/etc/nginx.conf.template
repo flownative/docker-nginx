@@ -2,7 +2,11 @@ daemon off;
 worker_processes  ${NGINX_WORKER_PROCESSES};
 
 pid ${NGINX_TMP_PATH}/nginx.pid;
+
+# The file is what log shippers like Promtail pick up, the stream is what
+# "docker logs" and Kubernetes show:
 error_log ${FLOWNATIVE_LOG_PATH}/nginx-error.log ${NGINX_ERROR_LOG_LEVEL};
+error_log /dev/stderr ${NGINX_ERROR_LOG_LEVEL};
 
 load_module ${NGINX_BASE_PATH}/modules/ngx_http_headers_more_filter_module.so;
 
@@ -18,7 +22,7 @@ http {
     fastcgi_temp_path "${NGINX_TMP_PATH}/fastcgi" 1 2;
     scgi_temp_path "${NGINX_TMP_PATH}/scgi" 1 2;
     uwsgi_temp_path "${NGINX_TMP_PATH}/uwsgi" 1 2;
-    fastcgi_cache_path "${NGINX_CACHE_PATH}" levels=1:2 keys_zone=application:10m max_size=${NGINX_CACHE_MAX_SIZE};
+    fastcgi_cache_path "${NGINX_CACHE_PATH}" levels=1:2 keys_zone=${NGINX_CACHE_NAME}:10m max_size=${NGINX_CACHE_MAX_SIZE};
     proxy_cache_path "${NGINX_CACHE_RESOURCES_PATH}" levels=1:2 keys_zone=persistent_res:2m max_size=${NGINX_CACHE_RESOURCES_MAX_SIZE} inactive=336h use_temp_path=off;
 
     include ${NGINX_CONF_PATH}/mime.types;

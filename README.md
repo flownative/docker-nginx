@@ -35,14 +35,17 @@ The BEACH_NGINX_MODE variable follows legacy naming and will be renamed
 
 ### Logging
 
-By default, the access log is written to STDOUT, and the error log is
-redirected to STDERR. That way, you can follow logs by watching
-container logs with `docker logs` or using a similar mechanism in
-Kubernetes or your actual platform.
+The access log is written to STDOUT, and the error log to STDERR. That
+way, you can follow logs by watching container logs with `docker logs`
+or using a similar mechanism in Kubernetes or your actual platform.
 
-Additionally, logs are also stored in /opt/flownative/log/nginx-error.log
-and /opt/flownative/log/nginx-access.log. If the log format is "json",
-the access log file is /opt/flownative/log/nginx-access.json.log
+Additionally, logs are also written to /opt/flownative/log/nginx-error.log
+and /opt/flownative/log/nginx-access.log, where log shippers such as
+Promtail can pick them up. If the log format is "json", the access log
+file is /opt/flownative/log/nginx-access.json.log
+
+Those files are rotated by logrotate: daily if they exceed 100 KB, and
+immediately once they exceed 50 MB. One rotated generation is kept.
 
 Note that the error log only contains errors related to the webserver itself.
 Requests resulting in status codes like 404 (not found) or 503 (internal
@@ -84,7 +87,7 @@ errors might keep Nginx from starting.
 | NGINX_BASE_PATH                             | string  | /opt/flownative/nginx                 | Base path for Nginx                                                                                                                                                                                               |
 | NGINX_WORKER_PROCESSES                      | string  | auto                                  | Number of Nginx worker processes (see [documentation](https://nginx.org/en/docs/ngx_core_module.html#worker_processes))                                                                                           |
 | NGINX_ERROR_LOG_LEVEL                       | string  | warn                                  | Nginx log level (see [documentation](https://docs.nginx.com/nginx/admin-guide/monitoring/logging/))                                                                                                               |
-| NGINX_ACCESS_LOG_ENABLE                     | boolean | no                                    | Nginx log level (see [documentation](https://docs.nginx.com/nginx/admin-guide/monitoring/logging/))                                                                                                               |
+| NGINX_ACCESS_LOG_ENABLE                     | boolean | no                                    | If the access log should be enabled; only has an effect when BEACH_NGINX_MODE is "Flow"                                                                                                                           |
 | NGINX_ACCESS_LOG_FORMAT                     | string  | default                               | Format of the access log; possible values are "default" and "json"                                                                                                                                                |
 | NGINX_ACCESS_LOG_MODE                       | string  | dynamic                               | Defines which requests should be logged: "dynamic" only logs dynamic requests to PHP, "all" also includes requests to static files                                                                                |
 | NGINX_ACCESS_LOG_IGNORED_STATUS_CODES_REGEX | string  | ^[13]                                 | Regular expression which defines which status codes should NOT be logged into the access log                                                                                                                      |
@@ -100,6 +103,7 @@ errors might keep Nginx from starting.
 | NGINX_CUSTOM_ERROR_PAGE_TARGET              | string  |                                       | Upstream URL to use for custom FastCGI error pages, for example https://example.com/maintenance.html                                                                                                              |
 | NGINX_CUSTOM_LOCATION_BLOCK_BASE64          | string  |                                       | Base64-encoded Nginx location block to include in the server configuration. The block will be included in the server configuration before the default location block. Be careful!                                 |
 | NGINX_STATIC_ROOT                           | string  | /var/www/html                         | Document root path for when BEACH_NGINX_MODE is "Static"                                                                                                                                                          |
+| NGINX_STATIC_FILES_LIFETIME                 | string  | 6M                                    | Expiration time for static files and persistent resources; examples: "3600s" or "7d" or "max"                                                                                                                     |
 | NGINX_STRICT_TRANSPORT_SECURITY_ENABLE      | boolean | no                                    | If Strict-Transport-Security headers should be sent (HSTS)                                                                                                                                                        |
 | NGINX_STRICT_TRANSPORT_SECURITY_PRELOAD     | boolean | no                                    | If site should be added to list of HTTPS-only sites by Google and others                                                                                                                                          |
 | NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE     | boolean | 31536000                              | Maxmimum age for Strict-Transport-Security header, if enabled                                                                                                                                                     |
@@ -111,11 +115,28 @@ errors might keep Nginx from starting.
 | BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH      | string  | /metrics                              | Path where metrics are located                                                                                                                                                                                    |
 | BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT      | integer | 8082                                  | Port at which Nginx should listen to provide the metrics for scraping                                                                                                                                             |
 | BEACH_NGINX_MODE                            | string  | Flow                                  | Either "Flow" or "Static"; this variable is going to be renamed in the future                                                                                                                                     |
+| BEACH_PHP_FPM_HOST                          | string  | 127.0.0.1                             | Host PHP-FPM is reached at. Prefer an address over a name which resolves to several addresses (such as "localhost"), see the note below                                                                           |
+| BEACH_PHP_FPM_PORT                          | integer | 9000                                  | Port PHP-FPM is reached at                                                                                                                                                                                        |
+| LOGROTATE_INTERVAL                          | integer | 300                                   | Seconds between two logrotate runs                                                                                                                                                                               |
 | BEACH_ASSET_PROXY_ENDPOINT                  | string  |                                       | Endpoint of a cloud storage frontend to use for proxying requests to Flow persistent resources. Requires BEACH_PERSISTENT_RESOURCES_BASE_PATH to be set. Example: "https://assets.flownative.com/example-bucket/" |
 | BEACH_ASSET_PROXY_RESOLVER                  | string  | 8.8.8.8                               | IP address of a DNS server to use for resolving domains when proxying assets. Set this to 127.0.0.11 when using Local Beach.                                                                                      |
 | BEACH_PERSISTENT_RESOURCES_BASE_PATH        | string  |                                       | Base path of URLs pointing to Flow persistent resources; example: "https://www.flownative.com/assets/"                                                                                                            |
-| BEACH_STATIC_RESOURCES_LIFETIME             | string  | 30d                                   | Expiration time for static resources; examples: "3600s" or "7d" or "max"                                                                                                                                          |
-| FLOW_HTTP_TRUSTED_PROXIES                   | string  | 10.0.0.0/8                            | Nginx passes FLOW_HTTP_TRUSTED_PROXIES to the virtual host using the value of this variable                                                                                                                       |
+| FLOW_HTTP_TRUSTED_PROXIES                   | string  | 10.0.0.0/8,127.0.0.1/32,172.16.0.0/12 | Nginx passes FLOW_HTTP_TRUSTED_PROXIES to the virtual host using the value of this variable                                                                                                                       |
+
+## Connecting to PHP-FPM
+
+`BEACH_PHP_FPM_HOST` defaults to the address `127.0.0.1` rather than the name
+`localhost` on purpose. `localhost` resolves to both `::1` and `127.0.0.1`,
+and Nginx then treats those two addresses as an upstream group. Groups are
+subject to passive health checks: a single refused connection — a probe
+during startup, before PHP-FPM is listening, is enough — marks the addresses
+as unavailable for `fail_timeout`, and every request in that window fails
+with "no live upstreams" even though PHP-FPM is up again. With a single
+address, Nginx ignores `max_fails` / `fail_timeout` and never considers the
+upstream unavailable.
+
+So if you point this variable at a name, prefer one that resolves to exactly
+one address.
 
 ## Asset Proxy
 
