@@ -2,6 +2,10 @@ daemon off;
 worker_processes  ${NGINX_WORKER_PROCESSES};
 
 pid ${NGINX_TMP_PATH}/nginx.pid;
+
+# The file is what log shippers like Promtail pick up, the stream is what
+# "docker logs" and Kubernetes show:
+error_log ${FLOWNATIVE_LOG_PATH}/nginx-error.log ${NGINX_ERROR_LOG_LEVEL};
 error_log /dev/stderr ${NGINX_ERROR_LOG_LEVEL};
 
 load_module ${NGINX_BASE_PATH}/modules/ngx_http_headers_more_filter_module.so;

@@ -63,8 +63,10 @@ FROM nginx:${NGINX_VERSION}-alpine
 LABEL org.opencontainers.image.authors="Robert Lemke <robert@flownative.com>"
 
 ENV FLOWNATIVE_LIB_PATH=/opt/flownative/lib \
-    NGINX_BASE_PATH=/opt/flownative/nginx \
+    FLOWNATIVE_LOG_PATH=/opt/flownative/log \
     FLOWNATIVE_LOG_PATH_AND_FILENAME=/dev/stdout \
+    LOGROTATE_BASE_PATH=/opt/flownative/logrotate \
+    NGINX_BASE_PATH=/opt/flownative/nginx \
     LOG_DEBUG=false
 
 USER root
@@ -73,8 +75,9 @@ USER root
 #
 # bash              The entrypoint and library scripts are written in Bash
 # ca-certificates   Up to date CA certificates for validation
+# logrotate         Rotates the log files Nginx writes to FLOWNATIVE_LOG_PATH
 
-RUN apk add --no-cache bash ca-certificates
+RUN apk add --no-cache bash ca-certificates logrotate
 
 COPY --from=envsubst-builder /out/envsubst /usr/local/bin/envsubst
 COPY --from=module-builder /out.so /usr/lib/nginx/modules/ngx_http_headers_more_filter_module.so

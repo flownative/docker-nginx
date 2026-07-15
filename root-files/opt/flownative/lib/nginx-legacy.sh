@@ -49,7 +49,13 @@ export BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI=${BEACH_PERSISTENT_RESOURCES
 export BEACH_PERSISTENT_RESOURCES_BASE_PATH=${BEACH_PERSISTENT_RESOURCES_BASE_PATH:-/_Resources/Persistent/}
 export BEACH_ASSET_PROXY_ENDPOINT=${BEACH_ASSET_PROXY_ENDPOINT:-}
 export BEACH_ASSET_PROXY_RESOLVER=${BEACH_ASSET_PROXY_RESOLVER:-8.8.8.8}
-export BEACH_PHP_FPM_HOST=${BEACH_PHP_FPM_HOST:-localhost}
+# Deliberately an address, not "localhost": the latter resolves to both ::1 and
+# 127.0.0.1, which makes Nginx treat them as an implicit upstream group. Such a
+# group does passive health checks, so a single refused connection - a probe
+# during pod startup is enough - marks both addresses down for fail_timeout and
+# every request in that window fails with "no live upstreams". With a single
+# address, Nginx ignores max_fails/fail_timeout and never considers it down.
+export BEACH_PHP_FPM_HOST=${BEACH_PHP_FPM_HOST:-127.0.0.1}
 export BEACH_PHP_FPM_PORT=${BEACH_PHP_FPM_PORT:-9000}
 export BEACH_NGINX_MODE=${BEACH_NGINX_MODE:-Flow}
 export BEACH_NGINX_STATUS_ENABLE=${BEACH_NGINX_STATUS_ENABLE:-true}
@@ -163,12 +169,16 @@ EOM
     staticAccessLogDirective=""
 
     if is_boolean_yes "${NGINX_ACCESS_LOG_ENABLE}"; then
+        # The file is what log shippers like Promtail pick up, the stream is what
+        # "docker logs" and Kubernetes show:
         if [ "${NGINX_ACCESS_LOG_FORMAT}" == "json" ]; then
             info "Nginx: Enabling access log using format 'json' ..."
-            dynamicAccessLogDirective="    access_log /dev/stdout main_json buffer=256k flush=5s if=\$status_is_enabled_for_access_log;"
+            dynamicAccessLogDirective="    access_log ${FLOWNATIVE_LOG_PATH}/nginx-access.json.log main_json buffer=256k flush=5s if=\$status_is_enabled_for_access_log;
+    access_log /dev/stdout main_json buffer=256k flush=5s if=\$status_is_enabled_for_access_log;"
         else
             info "Nginx: Enabling access log using format 'default' ..."
-            dynamicAccessLogDirective="    access_log /dev/stdout main_ext buffer=256k flush=5s if=\$status_is_enabled_for_access_log;"
+            dynamicAccessLogDirective="    access_log ${FLOWNATIVE_LOG_PATH}/nginx-access.log main_ext buffer=256k flush=5s if=\$status_is_enabled_for_access_log;
+    access_log /dev/stdout main_ext buffer=256k flush=5s if=\$status_is_enabled_for_access_log;"
         fi
     else
         info "Nginx: Access log is disabled"

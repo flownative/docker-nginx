@@ -21,7 +21,12 @@ mkdir -p \
     "${NGINX_BASE_PATH}/etc/sites-enabled" \
     "${NGINX_BASE_PATH}/modules" \
     "${NGINX_BASE_PATH}/sbin" \
-    "${NGINX_BASE_PATH}/tmp"
+    "${NGINX_BASE_PATH}/tmp" \
+    "${FLOWNATIVE_LOG_PATH}" \
+    "${LOGROTATE_BASE_PATH}/var"
+
+chown -R nginx:nginx "${FLOWNATIVE_LOG_PATH}" "${LOGROTATE_BASE_PATH}"
+chmod -R g+rwX "${FLOWNATIVE_LOG_PATH}" "${LOGROTATE_BASE_PATH}"
 
 # "modules" is a symlink to /usr/lib/nginx/modules whose contents are moved
 # below, so it must not be moved along:
