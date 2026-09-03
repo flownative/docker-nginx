@@ -90,9 +90,9 @@ errors might keep Nginx from starting.
 | NGINX_ACCESS_LOG_IGNORED_STATUS_CODES_REGEX | string  | ^[13]                                 | Regular expression which defines which status codes should NOT be logged into the access log                                                                                                                      |
 | NGINX_CACHE_ENABLE                          | boolean | no                                    | If the FastCGI cache should be enabled; see section about caching                                                                                                                                                 |
 | NGINX_CACHE_NAME                            | string  | application                           | Name of the memory zone Nginx should use for caching                                                                                                                                                              |
-| NGINX_CACHE_DEFAULT_LIFETIME                | string  | 5s                                    | Default cache lifetime to use when caching is enabled                                                                                                                                                             |
+| NGINX_CACHE_DEFAULT_LIFETIME                | string  | 5s                                    | Cache lifetime, applied *only* when the upstream sends no cache headers; see section about caching                                                                                                                |
 | NGINX_CACHE_MAX_SIZE                        | string  | 1024m                                 | Maximum memory size for the FastCGI cache                                                                                                                                                                         |
-| NGINX_CACHE_INACTIVE                        | string  | 1h                                    | Time after which cache entries are removed automatically                                                                                                                                                          |
+| NGINX_CACHE_INACTIVE                        | string  | 1h                                    | Time after which cache entries are removed if they were not accessed                                                                                                                                              |
 | NGINX_CACHE_USE_STALE_OPTIONS               | string  | updating error timeout invalid_header | Options to pass to the `fastcgi_cache_use_stale` directive                                                                                                                                                        |
 | NGINX_CACHE_BACKGROUND_UPDATE               | boolean | off                                   | If background updates should be enabled                                                                                                                                                                           |
 | NGINX_CACHE_RESOURCES_MAX_SIZE              | string  | 2g                                    | Maximum disk size for the persistent resources proxy cache                                                                                                                                                        |
@@ -116,6 +116,70 @@ errors might keep Nginx from starting.
 | BEACH_PERSISTENT_RESOURCES_BASE_PATH        | string  |                                       | Base path of URLs pointing to Flow persistent resources; example: "https://www.flownative.com/assets/"                                                                                                            |
 | BEACH_STATIC_RESOURCES_LIFETIME             | string  | 30d                                   | Expiration time for static resources; examples: "3600s" or "7d" or "max"                                                                                                                                          |
 | FLOW_HTTP_TRUSTED_PROXIES                   | string  | 10.0.0.0/8                            | Nginx passes FLOW_HTTP_TRUSTED_PROXIES to the virtual host using the value of this variable                                                                                                                       |
+
+## FastCGI Cache
+
+When `NGINX_CACHE_ENABLE` is set, Nginx caches FastCGI responses in a
+pod-local cache. This takes load off PHP, but it also means that each replica
+of a deployment keeps its own independent copy of a page.
+
+### Upstream headers take precedence over NGINX_CACHE_DEFAULT_LIFETIME
+
+`NGINX_CACHE_DEFAULT_LIFETIME` is a *fallback*, not an upper bound. It is
+rendered into a `fastcgi_cache_valid` directive, and Nginx only applies that
+directive if the upstream response contains none of the following headers:
+
+- `X-Accel-Expires`
+- `Cache-Control`
+- `Expires`
+- `Set-Cookie`
+
+If the application sends `Cache-Control: public, max-age=3600`, Nginx caches
+the response for one hour, regardless of `NGINX_CACHE_DEFAULT_LIFETIME`. This
+is intentional: the application, not the webserver, decides how long a
+response may be cached by a shared cache. Note that Nginx does not subtract an
+existing `Age` header when calculating the lifetime — it applies the full
+`max-age` from the moment it received the response.
+
+Because each replica fills its cache at a different point in time, a long
+`max-age` combined with multiple replicas leads to replicas serving different
+versions of a page for the duration of that lifetime.
+
+### Neos projects using Flowpack.FullPageCache
+
+The `Flowpack.FullPageCache` package sends the `Cache-Control` header
+described above. Its `maxPublicCacheTime` setting controls that header
+independently of how long entries are kept in the package's own (taggable)
+cache backend, so a long application-side cache lifetime can be combined with
+a short lifetime for downstream caches such as this one:
+
+```yaml
+Flowpack:
+  FullPageCache:
+    # upper bound for the max-age sent to Nginx, CDNs and browsers
+    maxPublicCacheTime: 5
+```
+
+Setting `maxPublicCacheTime: 0` disables the header entirely, but also
+disables the `ETag` the package would otherwise send, because both are set
+together.
+
+### Debugging
+
+Responses carry an `X-Nginx-Cache` header reflecting `$upstream_cache_status`
+(`MISS`, `HIT`, `EXPIRED`, `STALE`, `UPDATING`, `BYPASS`). To find out which
+lifetime Nginx actually applied to an entry, inspect the cache file: it starts
+with a binary header in which the second and sixth 64-bit values are the
+expiry and response timestamps, followed by the cache key and the upstream
+response headers.
+
+```bash
+od -A d -t u8 -N 48 <cache-file>
+```
+
+Requests carrying a `Neos_Session` cookie bypass the cache, so a logged-in
+editor never sees cached output — reproduce caching issues in a private
+browser window.
 
 ## Asset Proxy
 
