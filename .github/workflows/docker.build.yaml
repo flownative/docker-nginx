@@ -8,9 +8,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
-          ref: 'main'
           fetch-depth: 100
 
       - run: |
@@ -23,7 +22,7 @@ jobs:
       - run: |
           sudo chmod -R ugo+rwX . && shopt -s dotglob && rm -rf *
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ steps.latest_version.outputs.tag }}
           fetch-depth: 100

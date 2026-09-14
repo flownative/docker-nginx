@@ -4,6 +4,10 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+apt-get purge -y --allow-remove-essential perl-base
+rm -f /usr/bin/apt*
+rm -f /usr/bin/debconf*
+
 useradd --home-dir "${NGINX_BASE_PATH}" --no-create-home --no-user-group --uid 1000 nginx
 groupadd --gid 1000 nginx
 
