@@ -98,13 +98,6 @@ nginx_legacy_initialize_flow() {
         fi
     fi
 
-    if is_boolean_yes "${NGINX_ENABLE_UNDERSCORES_IN_HEADERS}"; then
-        info "Nginx: Enabling underscores in headers ..."
-        underScoresInHeadersDirective="underscores_in_headers on;"
-    else
-        underScoresInHeadersDirective="underscores_in_headers off;"
-    fi
-
     cat >"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
 
 server {
@@ -420,6 +413,15 @@ nginx_legacy_initialize() {
     info "Nginx: Setting up site configuration ..."
 
     info "Nginx: Mode is ${BEACH_NGINX_MODE}"
+
+    # Consumed by nginx_legacy_initialize_static(), therefore it must be set
+    # regardless of the mode:
+    if is_boolean_yes "${NGINX_ENABLE_UNDERSCORES_IN_HEADERS}"; then
+        info "Nginx: Enabling underscores in headers ..."
+        underScoresInHeadersDirective="underscores_in_headers on;"
+    else
+        underScoresInHeadersDirective="underscores_in_headers off;"
+    fi
 
     if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
         nginx_legacy_initialize_flow
