@@ -111,6 +111,8 @@ errors might keep Nginx from starting.
 | BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH      | string  | /metrics                              | Path where metrics are located                                                                                                                                                                                    |
 | BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT      | integer | 8082                                  | Port at which Nginx should listen to provide the metrics for scraping                                                                                                                                             |
 | BEACH_NGINX_MODE                            | string  | Flow                                  | Either "Flow" or "Static"; this variable is going to be renamed in the future                                                                                                                                     |
+| BEACH_PHP_FPM_HOST                          | string  | 127.0.0.1                             | Host PHP-FPM is reached at. Prefer an address over a name which resolves to several addresses (such as "localhost"), see the note below                                                                           |
+| BEACH_PHP_FPM_PORT                          | integer | 9000                                  | Port PHP-FPM is reached at                                                                                                                                                                                        |
 | BEACH_ASSET_PROXY_ENDPOINT                  | string  |                                       | Endpoint of a cloud storage frontend to use for proxying requests to Flow persistent resources. Requires BEACH_PERSISTENT_RESOURCES_BASE_PATH to be set. Example: "https://assets.flownative.com/example-bucket/" |
 | BEACH_ASSET_PROXY_RESOLVER                  | string  | 8.8.8.8                               | IP address of a DNS server to use for resolving domains when proxying assets. Set this to 127.0.0.11 when using Local Beach.                                                                                      |
 | BEACH_PERSISTENT_RESOURCES_BASE_PATH        | string  |                                       | Base path of URLs pointing to Flow persistent resources; example: "https://www.flownative.com/assets/"                                                                                                            |
@@ -180,6 +182,21 @@ od -A d -t u8 -N 48 <cache-file>
 Requests carrying a `Neos_Session` cookie bypass the cache, so a logged-in
 editor never sees cached output — reproduce caching issues in a private
 browser window.
+
+## Connecting to PHP-FPM
+
+`BEACH_PHP_FPM_HOST` defaults to the address `127.0.0.1` rather than the name
+`localhost` on purpose. `localhost` resolves to both `::1` and `127.0.0.1`,
+and Nginx then treats those two addresses as an upstream group. Groups are
+subject to passive health checks: a single refused connection — a probe
+during startup, before PHP-FPM is listening, is enough — marks the addresses
+as unavailable for `fail_timeout`, and every request in that window fails
+with "no live upstreams" even though PHP-FPM is up again. With a single
+address, Nginx ignores `max_fails` / `fail_timeout` and never considers the
+upstream unavailable.
+
+So if you point this variable at a name, prefer one that resolves to exactly
+one address.
 
 ## Asset Proxy
 
