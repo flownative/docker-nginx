@@ -67,6 +67,7 @@ nginx_config_fastcgi_cache() {
            fastcgi_cache_valid 404 410 30s;
            fastcgi_cache_use_stale ${NGINX_CACHE_USE_STALE_OPTIONS};
            fastcgi_cache_background_update ${NGINX_CACHE_BACKGROUND_UPDATE};
+           fastcgi_cache_lock on;
 
            set \$skipCache 0;
            if (\$http_cookie ~* "Neos_Session=([\w-]+)" ) {
