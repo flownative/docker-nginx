@@ -228,6 +228,12 @@ EOM
     }
 EOM
 
+    persistentResourcesCacheValidDirectives=""
+    if [ -n "${NGINX_CACHE_RESOURCES_VALID}" ]; then
+        info "Nginx: Caching persistent resources for ${NGINX_CACHE_RESOURCES_VALID}, ignoring upstream cache headers ..."
+        persistentResourcesCacheValidDirectives="proxy_ignore_headers Cache-Control Expires; proxy_cache_valid 200 ${NGINX_CACHE_RESOURCES_VALID};"
+    fi
+
     if [ -n "${BEACH_ASSET_PROXY_ENDPOINT}" ]; then
         cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     # redirect "subdivided" persistent resource requests to remove the subdivision parts
@@ -246,6 +252,11 @@ EOM
         proxy_cache persistent_res;
         # we care only about the resource hash as it's the only thing passed on, host is irrelevant
         proxy_cache_key \$1;
+        # revalidate expired entries with a conditional request, so that deleted resources are noticed
+        proxy_cache_revalidate on;
+        proxy_cache_lock on;
+        proxy_cache_use_stale error timeout updating;
+        ${persistentResourcesCacheValidDirectives}
         add_header X-Nginx-Cache-Resources \$upstream_cache_status;
     }
 EOM
@@ -267,6 +278,11 @@ EOM
         proxy_cache persistent_res;
         # we care only about the resource hash as it's the only thing passed on, host is irrelevant
         proxy_cache_key \$1;
+        # revalidate expired entries with a conditional request, so that deleted resources are noticed
+        proxy_cache_revalidate on;
+        proxy_cache_lock on;
+        proxy_cache_use_stale error timeout updating;
+        ${persistentResourcesCacheValidDirectives}
         add_header X-Nginx-Cache-Resources \$upstream_cache_status;
     }
 EOM
