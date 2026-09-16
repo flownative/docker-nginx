@@ -20,7 +20,7 @@ http {
     uwsgi_temp_path "${NGINX_TMP_PATH}/uwsgi" 1 2;
     # inactive= must be set explicitly, otherwise Nginx applies its own 10m default and
     # NGINX_CACHE_INACTIVE has no effect at all
-    fastcgi_cache_path "${NGINX_CACHE_PATH}" levels=1:2 keys_zone=application:10m max_size=${NGINX_CACHE_MAX_SIZE} inactive=${NGINX_CACHE_INACTIVE};
+    fastcgi_cache_path "${NGINX_CACHE_PATH}" levels=1:2 keys_zone=${NGINX_CACHE_NAME}:10m max_size=${NGINX_CACHE_MAX_SIZE} inactive=${NGINX_CACHE_INACTIVE};
     proxy_cache_path "${NGINX_CACHE_RESOURCES_PATH}" levels=1:2 keys_zone=persistent_res:2m max_size=${NGINX_CACHE_RESOURCES_MAX_SIZE} inactive=336h use_temp_path=off;
 
     include ${NGINX_CONF_PATH}/mime.types;

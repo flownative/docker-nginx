@@ -49,7 +49,7 @@ export BEACH_PERSISTENT_RESOURCES_FALLBACK_BASE_URI=${BEACH_PERSISTENT_RESOURCES
 export BEACH_PERSISTENT_RESOURCES_BASE_PATH=${BEACH_PERSISTENT_RESOURCES_BASE_PATH:-/_Resources/Persistent/}
 export BEACH_ASSET_PROXY_ENDPOINT=${BEACH_ASSET_PROXY_ENDPOINT:-}
 export BEACH_ASSET_PROXY_RESOLVER=${BEACH_ASSET_PROXY_RESOLVER:-8.8.8.8}
-export BEACH_PHP_FPM_HOST=${BEACH_PHP_FPM_HOST:-localhost}
+export BEACH_PHP_FPM_HOST=${BEACH_PHP_FPM_HOST:-127.0.0.1}
 export BEACH_PHP_FPM_PORT=${BEACH_PHP_FPM_PORT:-9000}
 export BEACH_NGINX_MODE=${BEACH_NGINX_MODE:-Flow}
 export BEACH_NGINX_STATUS_ENABLE=${BEACH_NGINX_STATUS_ENABLE:-true}
@@ -96,13 +96,6 @@ nginx_legacy_initialize_flow() {
             info "Nginx: Enabling Strict Transport Security without preloading, max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE} ..."
             addHeaderStrictTransportSecurity="add_header Strict-Transport-Security \"max-age=${NGINX_STRICT_TRANSPORT_SECURITY_MAX_AGE}\" always;"
         fi
-    fi
-
-    if is_boolean_yes "${NGINX_ENABLE_UNDERSCORES_IN_HEADERS}"; then
-        info "Nginx: Enabling underscores in headers ..."
-        underScoresInHeadersDirective="underscores_in_headers on;"
-    else
-        underScoresInHeadersDirective="underscores_in_headers off;"
     fi
 
     cat >"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
@@ -436,6 +429,15 @@ nginx_legacy_initialize() {
     info "Nginx: Setting up site configuration ..."
 
     info "Nginx: Mode is ${BEACH_NGINX_MODE}"
+
+    # Consumed by nginx_legacy_initialize_static(), therefore it must be set
+    # regardless of the mode:
+    if is_boolean_yes "${NGINX_ENABLE_UNDERSCORES_IN_HEADERS}"; then
+        info "Nginx: Enabling underscores in headers ..."
+        underScoresInHeadersDirective="underscores_in_headers on;"
+    else
+        underScoresInHeadersDirective="underscores_in_headers off;"
+    fi
 
     if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
         nginx_legacy_initialize_flow
