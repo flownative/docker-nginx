@@ -96,7 +96,7 @@ errors might keep Nginx from starting.
 | NGINX_CACHE_USE_STALE_OPTIONS               | string  | updating error timeout invalid_header | Options to pass to the `fastcgi_cache_use_stale` directive                                                                                                                                                        |
 | NGINX_CACHE_BACKGROUND_UPDATE               | boolean | off                                   | If background updates should be enabled                                                                                                                                                                           |
 | NGINX_CACHE_RESOURCES_MAX_SIZE              | string  | 2g                                    | Maximum disk size for the persistent resources proxy cache                                                                                                                                                        |
-| NGINX_CACHE_RESOURCES_VALID                 | string  |                                       | Lifetime of persistent resources in the proxy cache, overriding the cache headers of the storage; see section about the asset proxy                                                                               |
+| NGINX_CACHE_RESOURCES_VALID                 | string  | 1h                                    | Lifetime of persistent resources in the proxy cache, overriding the cache headers of the storage; see section about the asset proxy                                                                               |
 | NGINX_CUSTOM_ERROR_PAGE_CODES               | string  | 500 501 502 503                       | FastCGI error codes which should redirect to the custom error page; codes are separated by spaces                                                                                                                 |
 | NGINX_CUSTOM_ERROR_PAGE_TARGET              | string  |                                       | Upstream URL to use for custom FastCGI error pages, for example https://example.com/maintenance.html                                                                                                              |
 | NGINX_CUSTOM_LOCATION_BLOCK_BASE64          | string  |                                       | Base64-encoded Nginx location block to include in the server configuration. The block will be included in the server configuration before the default location block. Be careful!                                 |
@@ -220,7 +220,7 @@ How long an entry is considered valid is taken from the `Cache-Control` and
 `Expires` headers of the storage by default. Google Cloud Storage uses the
 `Cache-Control` metadata of the object, which may well be a lifetime of weeks,
 so a deleted resource keeps being served for just as long. Set
-`NGINX_CACHE_RESOURCES_VALID` (for example to "1h") to ignore those headers and
+`NGINX_CACHE_RESOURCES_VALID` (it defaults to "1h") to ignore those headers and
 cache successful responses for that period only. This bounds the time a deleted
 resource remains available through Nginx.
 
