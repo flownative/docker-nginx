@@ -60,6 +60,7 @@ export BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH=${BEACH_NGINX_CUSTOM_METRICS_SOURC
 export BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT=${BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT:-8082}
 
 export NGINX_CUSTOM_LOCATION_BLOCK_BASE64="${NGINX_CUSTOM_LOCATION_BLOCK_BASE64:-}"
+export NGINX_WELL_KNOWN_PHP_PATHS="${NGINX_WELL_KNOWN_PHP_PATHS:-}"
 
 export BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET="${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET:-}"
 export NGINX_CUSTOM_ERROR_PAGE_TARGET=${NGINX_CUSTOM_ERROR_PAGE_TARGET:-${BEACH_NGINX_CUSTOM_ERROR_PAGE_TARGET:-}}
@@ -116,6 +117,24 @@ EOM
         info "Nginx: Enabling custom location block ..."
         base64 -d <<<"${NGINX_CUSTOM_LOCATION_BLOCK_BASE64}" >>"${NGINX_CONF_PATH}/sites-enabled/site.conf"
     fi
+
+    read -r -a wellKnownPhpPaths <<<"${NGINX_WELL_KNOWN_PHP_PATHS}"
+    for wellKnownPhpPath in "${wellKnownPhpPaths[@]}"; do
+        # The path is rendered verbatim into the configuration, so only plain path characters are accepted
+        if [[ ! "${wellKnownPhpPath}" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]*$ || "${wellKnownPhpPath}" == *..* ]]; then
+            warn "Nginx: Ignoring invalid .well-known path '${wellKnownPhpPath}'"
+            continue
+        fi
+        info "Nginx: Passing requests to /.well-known/${wellKnownPhpPath} to PHP ..."
+        cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
+    # "^~" takes precedence over the regular expression locations, including the dot file rule below
+    location ^~ /.well-known/${wellKnownPhpPath} {
+        add_header Via '\$hostname' always;
+        try_files \$uri /index.php?\$args;
+    }
+
+EOM
+    done
 
     cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
     # allow .well-known/... in root
