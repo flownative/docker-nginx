@@ -100,6 +100,7 @@ errors might keep Nginx from starting.
 | NGINX_CUSTOM_ERROR_PAGE_CODES               | string  | 500 501 502 503                       | FastCGI error codes which should redirect to the custom error page; codes are separated by spaces                                                                                                                 |
 | NGINX_CUSTOM_ERROR_PAGE_TARGET              | string  |                                       | Upstream URL to use for custom FastCGI error pages, for example https://example.com/maintenance.html                                                                                                              |
 | NGINX_CUSTOM_LOCATION_BLOCK_BASE64          | string  |                                       | Base64-encoded Nginx location block to include in the server configuration. The block will be included in the server configuration before the default location block. Be careful!                                 |
+| NGINX_WELL_KNOWN_PHP_PATHS                  | string  |                                       | Space-separated path prefixes below /.well-known/ which are passed to PHP if no matching file exists, for example "oauth-protected-resource oauth-authorization-server"; see section about .well-known |
 | NGINX_STATIC_ROOT                           | string  | /var/www/html                         | Document root path for when BEACH_NGINX_MODE is "Static"                                                                                                                                                          |
 | NGINX_STATIC_FILES_LIFETIME                 | string  | 6M                                    | Expiration time for static files and persistent resources; examples: "3600s" or "7d" or "max"                                                                                                                     |
 | NGINX_STRICT_TRANSPORT_SECURITY_ENABLE      | boolean | no                                    | If Strict-Transport-Security headers should be sent (HSTS)                                                                                                                                                        |
@@ -119,6 +120,27 @@ errors might keep Nginx from starting.
 | BEACH_ASSET_PROXY_RESOLVER                  | string  | 8.8.8.8                               | IP address of a DNS server to use for resolving domains when proxying assets. Set this to 127.0.0.11 when using Local Beach.                                                                                      |
 | BEACH_PERSISTENT_RESOURCES_BASE_PATH        | string  |                                       | Base path of URLs pointing to Flow persistent resources; example: "https://www.flownative.com/assets/"                                                                                                            |
 | FLOW_HTTP_TRUSTED_PROXIES                   | string  | 10.0.0.0/8,127.0.0.1/32,172.16.0.0/12 | Nginx passes FLOW_HTTP_TRUSTED_PROXIES to the virtual host using the value of this variable                                                                                                                       |
+
+## Dynamic .well-known resources
+
+By default, Nginx serves `/.well-known/` only from files in the `Web/.well-known/`
+directory and responds with a 404 for everything else. Requests for paths below
+`/.well-known/` never reach PHP, so scanners probing for `security.txt` and
+similar files don't keep PHP workers busy.
+
+Some protocols expect the application to answer below `/.well-known/`, for example
+OAuth 2.0 metadata (RFC 8414 and RFC 9728) for an MCP server. List the path
+prefixes in `NGINX_WELL_KNOWN_PHP_PATHS` to pass these requests to `index.php`,
+just like any other URL:
+
+```
+NGINX_WELL_KNOWN_PHP_PATHS="oauth-protected-resource oauth-authorization-server"
+```
+
+A matching static file still takes precedence. Each entry is a prefix:
+`oauth-protected-resource` also covers `/.well-known/oauth-protected-resource/mcp`.
+Entries may only contain letters, digits, ".", "_", "-" and "/". Invalid entries are
+skipped with a warning.
 
 ## FastCGI Cache
 
