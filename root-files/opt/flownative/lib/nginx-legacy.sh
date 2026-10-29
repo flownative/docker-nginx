@@ -164,18 +164,8 @@ EOM
 
 EOM
 
-    if [ "${NGINX_AUTH_BASIC_REALM}" != "off" ]; then
-        info "Nginx: Enabling HTTP Basic Auth with realm ${NGINX_AUTH_BASIC_REALM} ..."
-        NGINX_AUTH_BASIC_HASHED_PASSWORD=$(echo "${NGINX_AUTH_BASIC_ENCODED_HASHED_PASSWORD}" | base64 -d)
-
-    cat >"${NGINX_CONF_PATH}/.htpasswd" <<-EOM
-${NGINX_AUTH_BASIC_USERNAME}:${NGINX_AUTH_BASIC_HASHED_PASSWORD}
-EOM
-
-    cat >>"${NGINX_CONF_PATH}/sites-enabled/site.conf" <<-EOM
-            auth_basic "${NGINX_AUTH_BASIC_REALM}";
-            auth_basic_user_file "${NGINX_CONF_PATH}/.htpasswd";
-EOM
+    if [ -n "${authBasicDirectives}" ]; then
+        echo "${authBasicDirectives}" >>"${NGINX_CONF_PATH}/sites-enabled/site.conf"
     fi
 
     dynamicAccessLogDirective=""
@@ -359,6 +349,8 @@ server {
 
     root ${NGINX_STATIC_ROOT};
 
+    ${authBasicDirectives}
+
     # deny files starting with a dot (having "/." in the path)
     location ~ /\\. {
         access_log off;
@@ -439,6 +431,32 @@ EOM
 }
 
 # ---------------------------------------------------------------------------------------
+# nginx_legacy_initialize_auth_basic() - Write the user file for HTTP Basic Auth
+#
+# Sets authBasicDirectives to the directives which enable the authentication in a
+# server block, or to an empty string if NGINX_AUTH_BASIC_REALM is "off".
+#
+# @global NGINX_* The NGINX_* environment variables
+# @return void
+#
+nginx_legacy_initialize_auth_basic() {
+    authBasicDirectives=""
+    if [ "${NGINX_AUTH_BASIC_REALM}" == "off" ]; then
+        return
+    fi
+
+    info "Nginx: Enabling HTTP Basic Auth with realm ${NGINX_AUTH_BASIC_REALM} ..."
+    NGINX_AUTH_BASIC_HASHED_PASSWORD=$(echo "${NGINX_AUTH_BASIC_ENCODED_HASHED_PASSWORD}" | base64 -d)
+
+    cat >"${NGINX_CONF_PATH}/.htpasswd" <<-EOM
+${NGINX_AUTH_BASIC_USERNAME}:${NGINX_AUTH_BASIC_HASHED_PASSWORD}
+EOM
+
+    authBasicDirectives="auth_basic \"${NGINX_AUTH_BASIC_REALM}\";
+    auth_basic_user_file \"${NGINX_CONF_PATH}/.htpasswd\";"
+}
+
+# ---------------------------------------------------------------------------------------
 # nginx_legacy_initialize() - Set up Nginx configuration an server block / site
 #
 # @global NGINX_* The NGINX_* environment variables
@@ -457,6 +475,8 @@ nginx_legacy_initialize() {
     else
         underScoresInHeadersDirective="underscores_in_headers off;"
     fi
+
+    nginx_legacy_initialize_auth_basic
 
     if [ "$BEACH_NGINX_MODE" == "Flow" ]; then
         nginx_legacy_initialize_flow
