@@ -111,6 +111,15 @@ server {
     if (\$http_user_agent ~* (citrixreceiver)) {
         return 403;
     }
+
+    # Never pass anything below /_Resources/ to PHP: uploaded files end up there,
+    # and a request like /_Resources/Persistent/<sha1>/upload.phar/x.php would
+    # otherwise make PHP-FPM run them. This mirrors the condition of the PHP
+    # location below and must stay in front of it (and of the custom location
+    # block), because Nginx uses the first matching regular expression.
+    location ~ ^/_Resources/.*\\.php\$ {
+        return 404;
+    }
 EOM
 
     if [ -n "${NGINX_CUSTOM_LOCATION_BLOCK_BASE64}" ]; then
