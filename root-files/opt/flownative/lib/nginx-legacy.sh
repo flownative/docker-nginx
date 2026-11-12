@@ -126,6 +126,7 @@ server {
     location ~ ^/_Resources/.*\\.php\$ {
         return 404;
     }
+
 EOM
 
     if [ -n "${NGINX_CUSTOM_LOCATION_BLOCK_BASE64}" ]; then
@@ -200,6 +201,10 @@ EOM
     $staticAccessLogDirective
 
     location ~ \\.php\$ {
+           # Only pass requests to PHP which point to an existing script, so that
+           # PHP-FPM never has to guess the script from a longer path.
+           try_files \$uri =404;
+
            include fastcgi_params;
 
            client_max_body_size 500M;
@@ -392,11 +397,18 @@ server {
         log_not_found off;
     }
 
+    # see nginx_legacy_initialize_flow()
+    location ~ ^/_Resources/.*\\.php\$ {
+        return 404;
+    }
+
     location ${BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH} {
       try_files \$uri /index.php?\$args;
     }
 
     location ~ \\.php\$ {
+        try_files \$uri =404;
+
         include fastcgi_params;
 
         fastcgi_pass ${BEACH_PHP_FPM_HOST}:${BEACH_PHP_FPM_PORT};
