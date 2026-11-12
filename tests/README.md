@@ -84,6 +84,7 @@ git worktree remove /tmp/nginx-baseline
 | `4-php-fpm.sh` | End-to-end against the real `beach-php` image, including the startup race. |
 | `5-logrotate.sh` | That the logrotate configuration rotates the log files and Nginx writes to the new file afterwards. |
 | `6-shutdown.sh` | That `docker stop` arrives and Nginx serves a running download to the end. |
+| `7-php-resources.sh` | That uploaded files below `/_Resources/` are never run by PHP, also not through path info (`upload.phar/x.php`), against the real `beach-php` image. |
 
 `lib.sh` holds the variable matrix and the shared helpers. Anyone introducing a
 new environment variable adds it there — `1-render.sh` and `2-nginx-t.sh` then
@@ -95,6 +96,8 @@ These lines may differ from the reference image, nothing else (the list lives
 in the script as `ACCEPTED_DIFF`, as an extended regular expression):
 
 - `try_files $uri -404;` → `try_files $uri =404;` — typo in the location for local persistent resources
+- `location ~ ^/_Resources/.*\.php$ { return 404; }` — added, nothing below `/_Resources/` is passed to PHP
+- `try_files $uri =404;` — added to the PHP locations, only existing scripts are passed to PHP
 
 **This list is written against 5.1.0.** A change which deliberately alters the
 rendered configuration enters exactly those lines there and lists them here.
@@ -142,6 +145,15 @@ test*, not in the image. Whoever works on them next saves time by knowing:
 - **The entrypoint logs to `/dev/stdout`.** When rendering the configuration,
   `[info]` lines and the banner end up in the same stream — `clean()` in
   `1-render.sh` filters them out.
+- **Nginx only passes existing scripts to PHP-FPM** (`try_files $uri =404`).
+  A request for `/index.php` reaches PHP-FPM only if Nginx itself sees the file,
+  so the tests share `/application` between the containers or create an empty
+  `index.php`. And they do so before the first request: `open_file_cache_errors`
+  makes Nginx remember a missing file for up to 30 seconds.
+- **The first container decides the owner of a shared volume.** Docker fills an
+  empty volume from the image of the first container mounting it. In the Nginx
+  image `/application` belongs to root, and PHP-FPM then fails on startup;
+  `create_application_volume` lets PHP go first.
 - **A fake FastCGI listener is useless.** Nginx then waits for
   `fastcgi_read_timeout` (240s). The end-to-end test needs real PHP-FPM.
 - **The reference is broken in static mode.** Up to `5.0.1` it aborts with

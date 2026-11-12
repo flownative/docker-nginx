@@ -20,9 +20,13 @@ cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
 
 CN=e2e-nginx
 CP=e2e-php
+VOL=e2e-application
 PORT=18094
 
-cleanup() { docker rm -f "${CN}" "${CP}" >/dev/null 2>&1 || true; }
+cleanup() {
+    docker rm -f "${CN}" "${CP}" >/dev/null 2>&1 || true
+    docker volume rm "${VOL}" >/dev/null 2>&1 || true
+}
 trap cleanup EXIT
 
 require_image "${CANDIDATE_IMAGE}" || exit 1
@@ -30,8 +34,15 @@ require_image "${PHP_IMAGE}" || exit 1
 
 heading "End-to-end: Nginx + PHP-FPM (${PHP_IMAGE})"
 cleanup
+create_application_volume "${VOL}"
+# The script has to exist from the start: Nginx only passes existing scripts
+# to PHP-FPM, and without it the requests below would never reach PHP-FPM.
+docker run --rm -v "${VOL}:/application" --entrypoint sh "${PHP_IMAGE}" \
+    -c 'mkdir -p /application/Web && echo "<?php echo \"PHP-OK\";" > /application/Web/probe.php'
 
-docker run -d --name "${CN}" -p "${PORT}:8080" \
+# Both containers share /application, as in a Beach pod: Nginx only passes
+# scripts to PHP-FPM which it can see itself.
+docker run -d --name "${CN}" -p "${PORT}:8080" -v "${VOL}:/application" \
     -e NGINX_ACCESS_LOG_ENABLE=true "${CANDIDATE_IMAGE}" >/dev/null
 wait_for_port "http://localhost:${PORT}/" || fail "port did not come up"
 
@@ -41,12 +52,11 @@ for _ in 1 2 3; do
 done
 
 echo "  2) PHP-FPM starts up (in the same network namespace, as in a Beach pod) ..."
-docker run -d --name "${CP}" --network "container:${CN}" "${PHP_IMAGE}" >/dev/null 2>&1
+docker run -d --name "${CP}" --network "container:${CN}" -v "${VOL}:/application" "${PHP_IMAGE}" >/dev/null 2>&1
 for _ in $(seq 1 30); do
     docker exec "${CN}" bash -c ': </dev/tcp/127.0.0.1/9000' 2>/dev/null && break
     sleep 2
 done
-docker exec "${CP}" sh -c 'mkdir -p /application/Web && echo "<?php echo \"PHP-OK\";" > /application/Web/probe.php'
 sleep 2
 
 echo "  3) Request after PHP-FPM is ready -- the decisive part:"

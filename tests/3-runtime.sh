@@ -92,6 +92,10 @@ for fmt in default json; do
         -e NGINX_ACCESS_LOG_FORMAT="${fmt}" \
         -e SYSLOG_JSON="${syslog_json}" \
         "${CANDIDATE_IMAGE}" >/dev/null
+    # Nginx only passes existing scripts on, so that the request reaches the
+    # missing PHP-FPM. Before the first request, because Nginx caches a
+    # missing file (open_file_cache_errors).
+    docker exec -u root "${C}" touch /application/Web/index.php
     wait_for_port "http://localhost:${PORT}/" || fail "port did not come up"
     curl -s -o /dev/null "http://localhost:${PORT}/index.php"
     sleep 7  # wait for flush=5s plus syslog-ng's follow_freq(1)

@@ -19,6 +19,7 @@ TESTS=(
     "4-php-fpm.sh"
     "5-logrotate.sh"
     "6-shutdown.sh"
+    "7-php-resources.sh"
 )
 
 echo "Candidate : ${CANDIDATE_IMAGE}"
