@@ -80,7 +80,7 @@ git worktree remove /tmp/nginx-baseline
 |---|---|
 | `1-render.sh` | **The core test.** Renders the configuration of both images across the whole variable matrix and compares it line by line. Everything except the deliberately changed lines has to be identical. |
 | `2-nginx-t.sh` | `nginx -t` across the same matrix. Catches syntax errors and a `headers_more` module which cannot be loaded. |
-| `3-runtime.sh` | Real requests: serving files, status endpoint, `more_set_headers`, logging to file *and* stream. |
+| `3-runtime.sh` | Real requests: serving files, status endpoint, `more_set_headers`, local persistent resources, logging to file *and* stream. |
 | `4-php-fpm.sh` | End-to-end against the real `beach-php` image, including the startup race. |
 | `5-logrotate.sh` | That the logrotate configuration rotates the log files and Nginx writes to the new file afterwards. |
 | `6-shutdown.sh` | That `docker stop` arrives and Nginx serves a running download to the end. |
@@ -91,14 +91,17 @@ cover it automatically.
 
 ## Expected differences in `1-render.sh`
 
-Against 5.1.0, none: the list in the script (`ACCEPTED_DIFF`) is empty, and
-every line which differs from the reference image is a failure.
+These lines may differ from the reference image, nothing else (the list lives
+in the script as `ACCEPTED_DIFF`, as an extended regular expression):
 
-A change which deliberately alters the rendered configuration enters exactly
-those lines there, as an extended regular expression, and lists them here. Once
-a version containing the change is released, `REFERENCE_IMAGE` points at exactly
-that one — the differences are gone then, and the list should be emptied again.
-If it stays as it is, the test no longer covers those lines at all.
+- `try_files $uri -404;` → `try_files $uri =404;` — typo in the location for local persistent resources
+
+**This list is written against 5.1.0.** A change which deliberately alters the
+rendered configuration enters exactly those lines there and lists them here.
+Once a version containing the change is released, `REFERENCE_IMAGE` points at
+exactly that one — the differences are gone then, and the list should be
+emptied again. If it stays as it is, the test no longer covers those lines at
+all.
 
 ## When tests fail
 

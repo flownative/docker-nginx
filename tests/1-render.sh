@@ -19,9 +19,10 @@ OUTDIR="${OUTDIR:-./out}"
 
 # Lines which are allowed to differ from the reference image, as an extended
 # regular expression matched against the diff lines ("< ..." / "> ...").
-# Written against the released 5.1.0; it is empty as long as the configuration
-# generation renders exactly what the reference renders.
-ACCEPTED_DIFF="${ACCEPTED_DIFF-}"
+# Written against the released 5.1.0:
+#   try_files -404 -> =404 for local persistent resources (typo)
+DEFAULT_ACCEPTED_DIFF='^< +try_files \$uri -404;$|^> +try_files \$uri =404;$'
+ACCEPTED_DIFF="${ACCEPTED_DIFF-${DEFAULT_ACCEPTED_DIFF}}"
 
 # ---------------------------------------------------------------------------
 # render() - Renders all configurations of an image into a directory
