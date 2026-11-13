@@ -32,7 +32,7 @@ Configuration through environment variables:
 | Variable | Default | Meaning |
 |---|---|---|
 | `CANDIDATE_IMAGE` | `flownative/nginx:local` | The image under test |
-| `REFERENCE_IMAGE` | `harbor.flownative.io/docker/nginx:5.0.1` | The baseline it is compared against (`1-render.sh` only) |
+| `REFERENCE_IMAGE` | `harbor.flownative.io/docker/nginx:5.1.0` | The baseline it is compared against (`1-render.sh` only) |
 | `PHP_IMAGE` | `flownative/beach-php:8.4` | PHP-FPM for the end-to-end test (`4-php-fpm.sh` only) |
 | `ACCEPTED_DIFF` | see below | Differences `1-render.sh` tolerates; set it empty to tolerate none |
 
@@ -69,7 +69,7 @@ To build the baseline from a released state instead of from the working tree,
 check that state out into a worktree, so your own is left alone:
 
 ```bash
-git worktree add /tmp/nginx-baseline v5.0.1
+git worktree add /tmp/nginx-baseline v5.1.0+1
 docker build -t flownative/nginx:baseline /tmp/nginx-baseline
 git worktree remove /tmp/nginx-baseline
 ```
@@ -91,17 +91,14 @@ cover it automatically.
 
 ## Expected differences in `1-render.sh`
 
-These lines may differ from the reference image, nothing else (the list lives
-in the script as `ACCEPTED_DIFF`):
+Against 5.1.0, none: the list in the script (`ACCEPTED_DIFF`) is empty, and
+every line which differs from the reference image is a failure.
 
-- `fastcgi_pass` — the default of `BEACH_PHP_FPM_HOST` is `127.0.0.1` instead of `localhost`
-- `keys_zone` — follows `NGINX_CACHE_NAME` now, instead of being hardcoded
-
-**This list is written against 5.0.1.** Once a version containing these fixes is
-released, `REFERENCE_IMAGE` points at exactly that one — the differences are
-gone then, and `ACCEPTED_DIFF` should be emptied in the script. From then on
-*every* difference is a failure until somebody deliberately enters it here. If
-the list stays as it is, the test no longer covers those lines at all.
+A change which deliberately alters the rendered configuration enters exactly
+those lines there, as an extended regular expression, and lists them here. Once
+a version containing the change is released, `REFERENCE_IMAGE` points at exactly
+that one — the differences are gone then, and the list should be emptied again.
+If it stays as it is, the test no longer covers those lines at all.
 
 ## When tests fail
 

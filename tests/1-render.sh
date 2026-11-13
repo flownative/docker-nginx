@@ -17,11 +17,11 @@ cd "$(dirname "${BASH_SOURCE[0]}")" || exit 1
 
 OUTDIR="${OUTDIR:-./out}"
 
-# Lines which are allowed to differ from the reference image, written against
-# the released 5.0.1.
-#   fastcgi_pass  -> default of BEACH_PHP_FPM_HOST is 127.0.0.1, not localhost
-#   keys_zone     -> follows NGINX_CACHE_NAME instead of being hardcoded
-ACCEPTED_DIFF="${ACCEPTED_DIFF-fastcgi_pass|keys_zone}"
+# Lines which are allowed to differ from the reference image, as an extended
+# regular expression matched against the diff lines ("< ..." / "> ...").
+# Written against the released 5.1.0; it is empty as long as the configuration
+# generation renders exactly what the reference renders.
+ACCEPTED_DIFF="${ACCEPTED_DIFF-}"
 
 # ---------------------------------------------------------------------------
 # render() - Renders all configurations of an image into a directory

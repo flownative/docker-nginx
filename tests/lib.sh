@@ -4,7 +4,7 @@
 
 # The image under test, and the one it is compared against.
 CANDIDATE_IMAGE="${CANDIDATE_IMAGE:-flownative/nginx:local}"
-REFERENCE_IMAGE="${REFERENCE_IMAGE:-harbor.flownative.io/docker/nginx:5.0.1}"
+REFERENCE_IMAGE="${REFERENCE_IMAGE:-harbor.flownative.io/docker/nginx:5.1.0}"
 PHP_IMAGE="${PHP_IMAGE:-flownative/beach-php:8.5}"
 
 # Each line: <name>|<KEY=VALUE>;<KEY=VALUE>...
@@ -23,6 +23,8 @@ cache-tuned|NGINX_CACHE_ENABLE=true;NGINX_CACHE_NAME=mysite;NGINX_CACHE_DEFAULT_
 cache-stale|NGINX_CACHE_ENABLE=true;NGINX_CACHE_USE_STALE_OPTIONS=error timeout
 cache-inactive|NGINX_CACHE_ENABLE=true;NGINX_CACHE_INACTIVE=12h
 cache-resources|NGINX_CACHE_RESOURCES_MAX_SIZE=5g;NGINX_CACHE_MAX_SIZE=512m
+cache-resources-valid|BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET=my-bucket;NGINX_CACHE_RESOURCES_VALID=10m
+cache-resources-valid-proxy|BEACH_ASSET_PROXY_ENDPOINT=https://assets.example.com/bucket;NGINX_CACHE_RESOURCES_VALID=7d
 asset-proxy|BEACH_ASSET_PROXY_ENDPOINT=https://assets.example.com/bucket;BEACH_PERSISTENT_RESOURCES_BASE_PATH=/assets/
 asset-proxy-resolver|BEACH_ASSET_PROXY_ENDPOINT=https://assets.example.com/bucket;BEACH_PERSISTENT_RESOURCES_BASE_PATH=/assets/;BEACH_ASSET_PROXY_RESOLVER=127.0.0.11
 gcs|BEACH_GOOGLE_CLOUD_STORAGE_TARGET_BUCKET=my-bucket
@@ -37,6 +39,8 @@ basicauth|NGINX_AUTH_BASIC_REALM=Staging;NGINX_AUTH_BASIC_USERNAME=admin;NGINX_A
 errorpage|NGINX_CUSTOM_ERROR_PAGE_TARGET=https://example.com/maintenance.html
 errorpage-codes|NGINX_CUSTOM_ERROR_PAGE_TARGET=https://example.com/x.html;NGINX_CUSTOM_ERROR_PAGE_CODES=502 503
 customblock|NGINX_CUSTOM_LOCATION_BLOCK_BASE64=bG9jYXRpb24gL2htIHsgcmV0dXJuIDIwNDsgfQo=
+wellknown|NGINX_WELL_KNOWN_PHP_PATHS=oauth-protected-resource oauth-authorization-server
+wellknown-invalid|NGINX_WELL_KNOWN_PHP_PATHS=../secret valid/path.json bad{path}
 metrics|BEACH_NGINX_CUSTOM_METRICS_ENABLE=true
 metrics-tuned|BEACH_NGINX_CUSTOM_METRICS_ENABLE=true;BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH=/prom;BEACH_NGINX_CUSTOM_METRICS_TARGET_PORT=9090
 status-off|BEACH_NGINX_STATUS_ENABLE=false
