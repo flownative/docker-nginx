@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Really starts the image and fires real requests at it: serving files, the
-# status endpoint, headers_more, logging.
+# status endpoint, headers_more, local persistent resources, logging.
 
 set -o nounset
 set -o pipefail
@@ -52,6 +52,26 @@ docker run -d --name "${C}" -p "${PORT}:8080" \
 wait_for_http "http://localhost:${PORT}/hm" || fail "port did not come up"
 check_equals "more_set_headers sets the header" \
     "$(curl -s -D - -o /dev/null "http://localhost:${PORT}/hm" | grep -ci '^X-Test: ok')" "1"
+
+# ------------------------------------------- Local persistent resources
+# Without an asset proxy, GCS bucket or fallback URI, persistent resources are
+# served from Web/_Resources/Persistent/. A missing one has to be a plain 404:
+# up to 5.1.0, "try_files $uri -404" made Nginx look for a file named
+# "Web-404" and log a failed open() for every missing resource.
+heading "Local persistent resources"
+cleanup
+docker run -d --name "${C}" -p "${PORT}:8080" "${CANDIDATE_IMAGE}" >/dev/null
+resource=/_Resources/Persistent/0123456789abcdef0123456789abcdef01234567
+docker exec -u root "${C}" sh -c "mkdir -p /application/Web${resource} && echo image > /application/Web${resource}/existing.jpg"
+wait_for_port "http://localhost:${PORT}/" || fail "port did not come up"
+
+check_equals "existing resource is served" \
+    "$(curl -s "http://localhost:${PORT}${resource}/existing.jpg")" "image"
+check_equals "missing resource returns 404" \
+    "$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:${PORT}${resource}/missing.jpg")" "404"
+sleep 1
+check_equals "missing resource is not logged as error" \
+    "$(docker exec "${C}" sh -c "grep -c 'missing.jpg' /opt/flownative/log/nginx-error.log" || true)" "0"
 
 # ------------------------------------------------------------------ Logging
 # The access_log directive is only rendered in Flow mode (in static mode,

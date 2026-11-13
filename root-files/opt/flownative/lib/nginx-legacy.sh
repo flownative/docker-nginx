@@ -323,7 +323,7 @@ EOM
         expires ${NGINX_STATIC_FILES_LIFETIME};
         add_header Via '\$hostname' always;
         ${addHeaderStrictTransportSecurity}
-        try_files \$uri -404;
+        try_files \$uri =404;
     }
 EOM
     fi
