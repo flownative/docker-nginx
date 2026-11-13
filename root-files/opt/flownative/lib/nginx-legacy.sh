@@ -117,6 +117,16 @@ server {
     if (\$http_user_agent ~* (citrixreceiver)) {
         return 403;
     }
+
+    # Never pass anything below /_Resources/ to PHP: uploaded files end up there,
+    # and a request like /_Resources/Persistent/<sha1>/upload.phar/x.php would
+    # otherwise make PHP-FPM run them. This mirrors the condition of the PHP
+    # location below and must stay in front of it (and of the custom location
+    # block), because Nginx uses the first matching regular expression.
+    location ~ ^/_Resources/.*\\.php\$ {
+        return 404;
+    }
+
 EOM
 
     if [ -n "${NGINX_CUSTOM_LOCATION_BLOCK_BASE64}" ]; then
@@ -191,6 +201,10 @@ EOM
     $staticAccessLogDirective
 
     location ~ \\.php\$ {
+           # Only pass requests to PHP which point to an existing script, so that
+           # PHP-FPM never has to guess the script from a longer path.
+           try_files \$uri =404;
+
            include fastcgi_params;
 
            client_max_body_size 500M;
@@ -383,11 +397,18 @@ server {
         log_not_found off;
     }
 
+    # see nginx_legacy_initialize_flow()
+    location ~ ^/_Resources/.*\\.php\$ {
+        return 404;
+    }
+
     location ${BEACH_NGINX_CUSTOM_METRICS_SOURCE_PATH} {
       try_files \$uri /index.php?\$args;
     }
 
     location ~ \\.php\$ {
+        try_files \$uri =404;
+
         include fastcgi_params;
 
         fastcgi_pass ${BEACH_PHP_FPM_HOST}:${BEACH_PHP_FPM_PORT};
