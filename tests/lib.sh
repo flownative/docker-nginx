@@ -123,3 +123,12 @@ wait_for_port() { # url, seconds
     done
     return 1
 }
+
+# Creates a volume for /application, shared by Nginx and PHP as in a Beach pod.
+# Docker fills an empty volume from the image of the first container mounting
+# it, along with owner and permissions: in the Nginx image, /application
+# belongs to root, and PHP-FPM then fails on startup. Hence PHP comes first.
+create_application_volume() { # volume
+    docker volume rm "$1" >/dev/null 2>&1 || true
+    docker run --rm -v "$1:/application" --entrypoint true "${PHP_IMAGE}" >/dev/null 2>&1
+}

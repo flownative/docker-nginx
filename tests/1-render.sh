@@ -21,7 +21,10 @@ OUTDIR="${OUTDIR:-./out}"
 # regular expression matched against the diff lines ("< ..." / "> ...").
 # Written against the released 5.1.0:
 #   try_files -404 -> =404 for local persistent resources (typo)
+#   _Resources    -> added: nothing below /_Resources/ is passed to PHP
+#   try_files     -> added: only existing scripts are passed to PHP
 DEFAULT_ACCEPTED_DIFF='^< +try_files \$uri -404;$|^> +try_files \$uri =404;$'
+DEFAULT_ACCEPTED_DIFF+='|^> +location ~ \^/_Resources/\.\*\\\.php\$ \{$|^> +return 404;$|^> +\}$'
 ACCEPTED_DIFF="${ACCEPTED_DIFF-${DEFAULT_ACCEPTED_DIFF}}"
 
 # ---------------------------------------------------------------------------

@@ -31,6 +31,10 @@ require_image "${CANDIDATE_IMAGE}" || exit 1
 heading "Logrotate"
 cleanup
 docker run -d --name "${C}" -p "${PORT}:8080" "${CANDIDATE_IMAGE}" >/dev/null
+# Nginx only passes existing scripts on, hence the empty index.php for the
+# request below. Before the first request, because Nginx caches a missing file
+# (open_file_cache_errors).
+docker exec -u root "${C}" touch /application/Web/index.php
 wait_for_port "http://localhost:${PORT}/" || fail "port did not come up"
 
 check_present "logrotate-cron.sh is running" \
