@@ -31,7 +31,7 @@ LABEL org.opencontainers.image.authors="Robert Lemke <robert@flownative.com>"
 # Nginx
 # Latest versions: https://packages.debian.org/trixie/nginx
 
-ENV NGINX_VERSION=1.26.3-3+deb13u7
+ENV NGINX_VERSION=1.26.3-3+deb13u11
 
 ENV FLOWNATIVE_LIB_PATH=/opt/flownative/lib \
     NGINX_BASE_PATH=/opt/flownative/nginx \
