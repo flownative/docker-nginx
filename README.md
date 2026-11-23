@@ -28,6 +28,9 @@ Set the environment variable "BEACH_NGINX_MODE" to "Static" and
 optionally set the variable "NGINX_STATIC_ROOT" to the path leading to
 the root of your static site.
 
+HTTP Basic Authentication works in this mode, too: set the
+`NGINX_AUTH_BASIC_*` variables just like for a Flow application.
+
 The BEACH_NGINX_MODE variable follows legacy naming and will be renamed
 / replaced by another concept in the future.
 
